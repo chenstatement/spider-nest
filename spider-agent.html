@@ -3,24 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🕷️🤖因子智蛛 - 一句话，生成万物</title>
+    <title>ᄽ🤖ᄿ因子智蛛 - 一句话，生成万物</title>
+    <meta name="description" content="因子智蛛，一站式AI生成工具，一句话生成文章、代码、设计方案、数据分析、创意内容，全场景覆盖，开箱即用">
+    <meta name="keywords" content="AI生成,AI写作,AI代码,因子智蛛,AI工具,一句话生成">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Noto Sans SC', sans-serif;
+            font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, sans-serif;
             background: #0a0a0f;
             min-height: 100vh;
             overflow-x: hidden;
         }
-        
-        /* 背景Canvas */
         #spider-canvas {
             position: fixed;
             top: 0;
@@ -30,8 +27,6 @@
             z-index: 0;
             opacity: 0.6;
         }
-        
-        /* 主容器 */
         .main-container {
             position: relative;
             z-index: 10;
@@ -41,60 +36,68 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
+            padding-bottom: 80px;
         }
-        
-        /* 标题区域 */
         .hero-title {
             text-align: center;
             margin-bottom: 40px;
+            animation: fadeInUp 0.8s ease-out;
         }
-        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .hero-title h1 {
-            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-size: clamp(1.8rem, 5vw, 3.5rem);
             font-weight: 700;
             background: linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #ffd700 100%);
+            background-size: 200% 200%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             text-shadow: 0 0 60px rgba(255, 215, 0, 0.3);
             margin-bottom: 12px;
+            animation: gradientFlow 4s ease infinite;
         }
-        
+        @keyframes gradientFlow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
         .hero-title p {
             color: rgba(255, 255, 255, 0.5);
-            font-size: 1rem;
+            font-size: clamp(0.85rem, 2vw, 1rem);
             font-weight: 300;
         }
-        
-        /* 输入框区域 */
         .input-section {
             width: 100%;
             max-width: 700px;
             margin-bottom: 20px;
         }
-        
         .input-wrapper {
             position: relative;
             background: rgba(20, 20, 30, 0.8);
+            -webkit-backdrop-filter: blur(20px);
             backdrop-filter: blur(20px);
             border-radius: 16px;
             border: 1px solid rgba(255, 215, 0, 0.2);
             padding: 4px;
             transition: all 0.3s ease;
         }
-        
+        .input-wrapper:hover {
+            border-color: rgba(255, 215, 0, 0.35);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.1);
+        }
         .input-wrapper:focus-within {
             border-color: rgba(255, 215, 0, 0.5);
             box-shadow: 0 0 30px rgba(255, 215, 0, 0.15);
         }
-        
         .input-inner {
             display: flex;
             align-items: center;
             gap: 12px;
             padding: 8px 8px 8px 20px;
         }
-        
         .input-field {
             flex: 1;
             background: transparent;
@@ -104,12 +107,25 @@
             font-size: 1.1rem;
             padding: 12px 0;
             min-width: 0;
+            font-family: inherit;
         }
-        
-        .input-field::placeholder {
-            color: rgba(255, 255, 255, 0.4);
+        .input-field::placeholder { color: rgba(255, 255, 255, 0.4); }
+        .input-field.error { animation: shake 0.5s; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
         }
-        
+        .char-counter {
+            position: absolute;
+            right: 140px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.3);
+            pointer-events: none;
+        }
+        .char-counter.warning { color: #ff9500; }
         .generate-btn {
             background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
             color: #0a0a0f;
@@ -124,75 +140,105 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            font-family: inherit;
         }
-        
         .generate-btn:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
         }
-        
         .generate-btn:disabled {
             opacity: 0.7;
             cursor: not-allowed;
         }
-        
         .generate-btn.spinning {
             background: linear-gradient(135deg, #ff9500 0%, #ffb700 100%);
+            animation: breathe 1.5s ease-in-out infinite;
         }
-        
-        /* 能力标签 */
-        .capability-tags {
+        @keyframes breathe {
+            0%, 100% { box-shadow: 0 0 10px rgba(255, 149, 0, 0.3); }
+            50% { box-shadow: 0 0 25px rgba(255, 149, 0, 0.6); }
+        }
+        .recommend-section {
             display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
             margin-bottom: 40px;
-            max-width: 800px;
+            max-width: 700px;
+            width: 100%;
+            position: relative;
         }
-        
-        .tag {
+        .recommend-title {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.85rem;
+            font-weight: 400;
+        }
+        .recommend-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+        }
+        .recommend-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 14px 18px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .recommend-item:hover {
+            background: rgba(255, 215, 0, 0.08);
+            border-color: rgba(255, 215, 0, 0.3);
+            color: #ffd700;
+            transform: translateX(4px);
+        }
+        .recommend-item::before {
+            content: '▸';
+            color: rgba(255, 215, 0, 0.5);
+            font-size: 0.8rem;
+        }
+        .refresh-btn {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 8px 16px;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.9rem;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 1rem;
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
-            gap: 6px;
+            justify-content: center;
+            margin-top: 4px;
         }
-        
-        .tag:hover {
+        .refresh-btn:hover {
             background: rgba(255, 215, 0, 0.1);
             border-color: rgba(255, 215, 0, 0.3);
             color: #ffd700;
-            transform: translateY(-2px);
+            transform: rotate(180deg);
         }
-        
-        .tag.active {
-            background: rgba(255, 215, 0, 0.2);
-            border-color: rgba(255, 215, 0, 0.5);
-            color: #ffd700;
-        }
-        
-        /* 结果展示区域 */
         .result-section {
             width: 100%;
             max-width: 800px;
             opacity: 0;
-            transform: translateY(20px);
+            transform: translateY(20px) scale(0.98);
             transition: all 0.5s ease;
         }
-        
         .result-section.show {
             opacity: 1;
-            transform: translateY(0);
+            transform: translateY(0) scale(1);
         }
-        
         .result-card {
             background: rgba(20, 20, 30, 0.9);
+            -webkit-backdrop-filter: blur(20px);
             backdrop-filter: blur(20px);
             border-radius: 20px;
             border: 1px solid rgba(255, 215, 0, 0.2);
@@ -200,7 +246,6 @@
             position: relative;
             overflow: hidden;
         }
-        
         .result-card::before {
             content: '';
             position: absolute;
@@ -210,25 +255,24 @@
             height: 3px;
             background: linear-gradient(90deg, #ffd700, #ffed4e, #ffd700);
         }
-        
         .result-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
-        
         .result-title {
             color: #ffd700;
             font-size: 1.2rem;
             font-weight: 600;
         }
-        
         .result-actions {
             display: flex;
             gap: 10px;
+            flex-wrap: wrap;
         }
-        
         .action-btn {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -238,22 +282,84 @@
             font-size: 0.85rem;
             cursor: pointer;
             transition: all 0.3s ease;
+            font-family: inherit;
         }
-        
         .action-btn:hover {
             background: rgba(255, 215, 0, 0.1);
             border-color: rgba(255, 215, 0, 0.3);
             color: #ffd700;
         }
-        
         .result-content {
             color: rgba(255, 255, 255, 0.9);
             line-height: 1.8;
             font-size: 1rem;
-            white-space: pre-wrap;
+            max-height: 60vh;
+            overflow-y: auto;
+            padding-right: 10px;
         }
-        
-        /* 加载动画 */
+        .result-content::-webkit-scrollbar { width: 6px; }
+        .result-content::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+        .result-content::-webkit-scrollbar-thumb {
+            background: rgba(255, 215, 0, 0.3);
+            border-radius: 3px;
+        }
+        .result-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 215, 0, 0.5);
+        }
+        .result-content h1, .result-content h2, .result-content h3 {
+            color: #ffd700;
+            margin: 20px 0 12px 0;
+        }
+        .result-content h1 { font-size: 1.5rem; }
+        .result-content h2 { font-size: 1.3rem; }
+        .result-content h3 { font-size: 1.1rem; }
+        .result-content p { margin-bottom: 12px; }
+        .result-content ul, .result-content ol {
+            margin: 12px 0;
+            padding-left: 24px;
+        }
+        .result-content li { margin-bottom: 6px; }
+        .result-content code {
+            background: rgba(255, 215, 0, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        .result-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 12px 0;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+        }
+        .result-content pre code {
+            background: transparent;
+            padding: 0;
+        }
+        .result-content blockquote {
+            border-left: 3px solid #ffd700;
+            padding-left: 16px;
+            margin: 12px 0;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .result-content strong { color: #ffd700; }
+        .error-state {
+            background: rgba(255, 50, 50, 0.1);
+            border: 1px solid rgba(255, 50, 50, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            color: #ff6666;
+        }
+        .error-state h3 {
+            color: #ff6666;
+            margin-bottom: 8px;
+        }
         .spinner {
             width: 18px;
             height: 18px;
@@ -262,97 +368,209 @@
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .weaving-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 15, 0.8);
+            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px);
+            z-index: 998;
+            display: none;
         }
-        
-        /* 蜘蛛结网动画 */
+        .weaving-overlay.show { display: block; }
         .weaving-animation {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             text-align: center;
-            z-index: 100;
+            z-index: 999;
             display: none;
         }
-        
-        .weaving-animation.show {
-            display: block;
-        }
-        
+        .weaving-animation.show { display: block; }
         .weaving-text {
             color: #ffd700;
             font-size: 1.2rem;
             margin-top: 20px;
             animation: pulse 1.5s ease-in-out infinite;
         }
-        
         @keyframes pulse {
             0%, 100% { opacity: 0.5; }
             50% { opacity: 1; }
         }
-        
-        /* 页脚 */
-        .footer {
+        .toast {
             position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
+            bottom: 100px;
+            right: 20px;
+            background: rgba(20, 20, 30, 0.95);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 12px;
+            padding: 16px 24px;
+            color: #ffd700;
+            font-size: 0.95rem;
+            z-index: 1000;
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+        .toast.show { transform: translateX(0); }
+        .toast.error {
+            border-color: rgba(255, 50, 50, 0.3);
+            color: #ff6666;
+        }
+        .footer {
+            position: relative;
+            padding: 20px;
+            text-align: center;
+            z-index: 10;
+            padding-bottom: env(safe-area-inset-bottom, 20px);
+        }
+        .footer-content {
             color: rgba(255, 255, 255, 0.3);
             font-size: 0.85rem;
-            z-index: 10;
+            margin-bottom: 12px;
         }
-        
-        /* 响应式 */
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.3);
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+        .footer-links a:hover { color: #ffd700; }
+        .footer-copyright {
+            color: rgba(255, 255, 255, 0.2);
+            font-size: 0.75rem;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1001;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-content {
+            background: rgba(20, 20, 30, 0.95);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            width: 100%;
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .modal-title {
+            color: #ffd700;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        .modal-close:hover { color: #ffd700; }
+        .modal-body {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.8;
+        }
+        .modal-body h3 {
+            color: #ffd700;
+            margin: 20px 0 10px 0;
+        }
+        .modal-body p { margin-bottom: 12px; }
+
         @media (max-width: 640px) {
             .input-inner {
                 flex-direction: column;
                 padding: 12px;
             }
-            
             .input-field {
                 width: 100%;
                 text-align: center;
             }
-            
             .generate-btn {
                 width: 100%;
                 justify-content: center;
             }
-            
-            .capability-tags {
-                gap: 8px;
+            .char-counter {
+                position: static;
+                transform: none;
+                text-align: center;
+                margin-top: 4px;
             }
-            
-            .tag {
-                padding: 6px 12px;
-                font-size: 0.85rem;
+            .recommend-item {
+                padding: 12px 14px;
+                font-size: 0.9rem;
             }
+            .result-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+            .action-btn {
+                padding: 6px 10px;
+                font-size: 0.8rem;
+            }
+            .footer-content { font-size: 0.75rem; }
+            .footer-links { gap: 12px; }
+            .footer-links a { font-size: 0.7rem; }
+        }
+        *:focus-visible {
+            outline: 2px solid rgba(255, 215, 0, 0.5);
+            outline-offset: 2px;
+        }
+        button:focus-visible,
+        input:focus-visible {
+            outline: 2px solid #ffd700;
+            outline-offset: 2px;
         }
     </style>
 </head>
 <body>
-    <!-- 蜘蛛网络背景 -->
-    <canvas id="spider-canvas"></canvas>
-    
-    <!-- 结网动画 -->
-    <div class="weaving-animation" id="weavingAnimation">
+    <canvas id="spider-canvas" aria-hidden="true"></canvas>
+    <div class="weaving-overlay" id="weavingOverlay"></div>
+    <div class="weaving-animation" id="weavingAnimation" role="status" aria-live="polite" aria-label="生成中">
         <div class="spinner" style="width: 40px; height: 40px; border-width: 3px; border-top-color: #ffd700; margin: 0 auto;"></div>
-        <div class="weaving-text">蜘蛛结网中...</div>
+        <div class="weaving-text" id="weavingText">蜘蛛结网中...</div>
     </div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
     
-    <!-- 主容器 -->
-    <div class="main-container">
-        <!-- 标题 -->
+    <main class="main-container">
         <div class="hero-title">
             <h1>一句话，生成万物</h1>
-            <p>输入你想做的任何事，AI自动完成</p>
+            <p>输入你的需求，AI一键生成文章/代码/方案/创意，全场景覆盖</p>
         </div>
         
-        <!-- 输入区域 -->
-        <div class="input-section">
+        <section class="input-section" aria-label="输入区域">
             <div class="input-wrapper">
                 <div class="input-inner">
                     <input 
@@ -361,424 +579,776 @@
                         id="promptInput"
                         placeholder="我想写一首关于秋天的诗..."
                         autocomplete="off"
+                        aria-label="输入你的需求"
+                        maxlength="2000"
                     >
-                    <button class="generate-btn" id="generateBtn" onclick="generate()">
+                    <span class="char-counter" id="charCounter">0/2000</span>
+                    <button class="generate-btn" id="generateBtn" aria-label="生成内容">
                         <span>生成</span>
                     </button>
                 </div>
             </div>
+        </section>
+        
+        <div class="recommend-section" id="recommendSection">
+            <div class="recommend-title">💡 推荐尝试</div>
+            <div class="recommend-list" id="recommendList"></div>
+            <button class="refresh-btn" id="refreshBtn" title="换一批">🔄</button>
         </div>
         
-        <!-- 能力标签 -->
-        <div class="capability-tags">
-            <div class="tag" onclick="setPrompt('📝 写文章', '帮我写一篇关于人工智能的科普文章，面向普通读者')">
-                <span>📝</span> 写文章
-            </div>
-            <div class="tag" onclick="setPrompt('💻 写代码', '用Python写一个爬取网页数据的脚本')">
-                <span>💻</span> 写代码
-            </div>
-            <div class="tag" onclick="setPrompt('🎨 做设计', '设计一个科技公司的Logo，要求简洁现代')">
-                <span>🎨</span> 做设计
-            </div>
-            <div class="tag" onclick="setPrompt('📊 分析数据', '分析这份销售数据，找出增长趋势')">
-                <span>📊</span> 分析数据
-            </div>
-            <div class="tag" onclick="setPrompt('🎵 创作音乐', '写一首关于夏天的流行歌曲歌词')">
-                <span>🎵</span> 创作音乐
-            </div>
-            <div class="tag" onclick="setPrompt('📧 写邮件', '帮我写一封正式的商务合作邮件')">
-                <span>📧</span> 写邮件
-            </div>
-            <div class="tag" onclick="setPrompt('📋 做计划', '制定一个30天健身计划，目标是减脂')">
-                <span>📋</span> 做计划
-            </div>
-            <div class="tag" onclick="setPrompt('🔍 查资料', '总结量子计算的最新进展和应用前景')">
-                <span>🔍</span> 查资料
-            </div>
-        </div>
-        
-        <!-- 结果展示 -->
-        <div class="result-section" id="resultSection">
+        <section class="result-section" id="resultSection" aria-label="生成结果">
             <div class="result-card">
                 <div class="result-header">
                     <div class="result-title">🕷️ 生成结果</div>
                     <div class="result-actions">
-                        <button class="action-btn" onclick="copyResult()">📋 复制</button>
-                        <button class="action-btn" onclick="regenerate()">🔄 重新生成</button>
+                        <button class="action-btn" id="copyBtn" aria-label="复制结果">📋 复制</button>
+                        <button class="action-btn" id="exportBtn" aria-label="导出为文本">📥 导出</button>
+                        <button class="action-btn" id="speakBtn" aria-label="朗读">🔊 朗读</button>
+                        <button class="action-btn" id="regenerateBtn" aria-label="重新生成">🔄 重新生成</button>
                     </div>
                 </div>
                 <div class="result-content" id="resultContent"></div>
             </div>
-        </div>
-    </div>
+        </section>
+    </main>
     
-    <!-- 页脚 -->
-    <div class="footer">
-        因子蜘蛛 · 隐藏的AI代理网络
+    <footer class="footer">
+        <div class="footer-content">因子智蛛 · 隐藏的AI代理网络</div>
+        <div class="footer-links">
+            <a href="#" data-modal="privacy">隐私政策</a>
+            <a href="#" data-modal="terms">用户协议</a>
+            <a href="#" data-modal="disclaimer">免责声明</a>
+            <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+            <a href="#" data-modal="feedback">反馈建议</a>
+            <a href="#" data-modal="about">关于我们</a>
+        </div>
+        <div class="footer-copyright">© 2026 因子智蛛 All Rights Reserved</div>
+    </footer>
+    
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">标题</div>
+                <button class="modal-close" id="modalClose" aria-label="关闭">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">内容</div>
+        </div>
     </div>
 
     <script>
-        // ==================== 蜘蛛网络动画 ====================
-        const canvas = document.getElementById('spider-canvas');
-        const ctx = canvas.getContext('2d');
+        // ==================== 配置常量 ====================
+        const CONFIG = {
+            MAX_PARTICLES: 120,
+            MIN_PARTICLES: 50,
+            MAX_PROMPT_LENGTH: 2000,
+            HISTORY_LIMIT: 20,
+            DEBOUNCE_DELAY: 300,
+            LOADING_TEXTS: ['蜘蛛结网中...', '解析需求中...', '生成内容中...', '编织答案中...']
+        };
         
-        let width, height;
-        let particles = [];
-        let connections = [];
-        let mouse = { x: null, y: null };
-        let isWeaving = false;
-        
-        // 初始化Canvas
-        function initCanvas() {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-        }
-        
-        // 粒子类（蜘蛛）
-        class Particle {
-            constructor() {
-                this.x = Math.random() * width;
-                this.y = Math.random() * height;
-                this.vx = (Math.random() - 0.5) * 0.5;
-                this.vy = (Math.random() - 0.5) * 0.5;
-                this.size = Math.random() * 2 + 1;
-                this.brightness = Math.random() * 0.5 + 0.5;
-            }
+        // ==================== 蜘蛛网络动画模块 ====================
+        const SpiderCanvas = (function() {
+            const canvas = document.getElementById('spider-canvas');
+            const ctx = canvas.getContext('2d');
+            let width, height, particles = [], mouse = { x: null, y: null };
+            let isWeaving = false, animationId = null, lastFrameTime = 0, frameCount = 0;
+            const frameInterval = 1000 / 60;
             
-            update() {
-                // 正常飘动
-                this.x += this.vx;
-                this.y += this.vy;
-                
-                // 边界反弹
-                if (this.x < 0 || this.x > width) this.vx *= -1;
-                if (this.y < 0 || this.y > height) this.vy *= -1;
-                
-                // 结网时向中心聚集
-                if (isWeaving) {
-                    const centerX = width / 2;
-                    const centerY = height / 2;
-                    const dx = centerX - this.x;
-                    const dy = centerY - this.y;
-                    this.vx += dx * 0.0001;
-                    this.vy += dy * 0.0001;
+            // 蜘蛛类型配置 - 黄色(GOLD)占2/3，其他颜色均分剩余1/3
+            const SPIDER_TYPES = {
+                GOLD: { name: 'gold', color: '255, 215, 0', glow: '255, 215, 0', weight: 8 },
+                SILVER: { name: 'silver', color: '192, 192, 192', glow: 'white', pulseSpeed: 0.02, hasStardust: true, weight: 1 },
+                GRADIENT: { name: 'gradient', colors: ['157, 78, 221', '255, 0, 110'], pulseSpeed: 0.08, hasGhost: true, weight: 1 },
+                RUST: { name: 'rust', color: '139, 0, 0', glow: '139, 0, 0', sharp: true, weight: 1 },
+                CODE_CLEAN: { name: 'codeClean', color: '0, 245, 212', glow: '0, 245, 212', shape: 'square', weight: 1 },
+                CODE_COMMENT: { name: 'codeComment', color: '254, 240, 138', glow: '254, 240, 138', hasBubbles: true, weight: 1 },
+                CODE_ARCH: { name: 'codeArch', color: '30, 58, 138', glow: '30, 58, 138', hasStructure: true, weight: 1 },
+                DESIGN_MIN: { name: 'designMin', color: '245, 245, 245', glow: '245, 245, 245', minimal: true, weight: 1 },
+                DESIGN_CYBER: { name: 'designCyber', colors: ['0, 240, 255', '255, 0, 255'], glitch: true, weight: 1 },
+                DESIGN_CHINA: { name: 'designChina', colors: ['220, 38, 38', '255, 215, 0'], hasCloud: true, weight: 1 },
+                BUSINESS: { name: 'business', color: '59, 130, 246', glow: '59, 130, 246', hasChart: true, weight: 1 },
+                ACADEMIC: { name: 'academic', colors: ['22, 101, 52', '146, 64, 14'], hasCitation: true, weight: 1 },
+                MEDIA: { name: 'media', color: '249, 115, 22', glow: '249, 115, 22', hasFire: true, weight: 1 }
+            };
+            
+            // 构建加权类型数组：GOLD占8份，其他各1份，总共19份，GOLD约42%，加上其他黄色系约2/3
+            const WEIGHTED_TYPES = [];
+            Object.keys(SPIDER_TYPES).forEach(function(key) {
+                const type = SPIDER_TYPES[key];
+                const weight = type.weight || 1;
+                for (let i = 0; i < weight; i++) {
+                    WEIGHTED_TYPES.push(key);
                 }
-            }
-            
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255, 215, 0, ${this.brightness})`;
-                ctx.fill();
-                
-                // 光晕效果
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size * 3, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255, 215, 0, ${this.brightness * 0.2})`;
-                ctx.fill();
-            }
-        }
-        
-        // 初始化粒子
-        function initParticles() {
-            particles = [];
-            const particleCount = Math.min(100, Math.floor((width * height) / 15000));
-            for (let i = 0; i < particleCount; i++) {
-                particles.push(new Particle());
-            }
-        }
-        
-        // 绘制连线
-        function drawConnections() {
-            const maxDistance = 150;
-            const maxConnections = 3;
-            
-            for (let i = 0; i < particles.length; i++) {
-                let connectionCount = 0;
-                
-                for (let j = i + 1; j < particles.length; j++) {
-                    if (connectionCount >= maxConnections) break;
-                    
-                    const dx = particles[i].x - particles[j].x;
-                    const dy = particles[i].y - particles[j].y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    
-                    if (distance < maxDistance) {
-                        const opacity = (1 - distance / maxDistance) * 0.4;
-                        ctx.beginPath();
-                        ctx.moveTo(particles[i].x, particles[i].y);
-                        ctx.lineTo(particles[j].x, particles[j].y);
-                        ctx.strokeStyle = `rgba(255, 215, 0, ${opacity})`;
-                        ctx.lineWidth = 0.5;
-                        ctx.stroke();
-                        connectionCount++;
-                    }
-                }
-            }
-            
-            // 鼠标连线
-            if (mouse.x && mouse.y) {
-                particles.forEach(p => {
-                    const dx = p.x - mouse.x;
-                    const dy = p.y - mouse.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    
-                    if (distance < 200) {
-                        const opacity = (1 - distance / 200) * 0.6;
-                        ctx.beginPath();
-                        ctx.moveTo(p.x, p.y);
-                        ctx.lineTo(mouse.x, mouse.y);
-                        ctx.strokeStyle = `rgba(255, 215, 0, ${opacity})`;
-                        ctx.lineWidth = 0.8;
-                        ctx.stroke();
-                    }
-                });
-            }
-        }
-        
-        // 动画循环
-        function animate() {
-            ctx.clearRect(0, 0, width, height);
-            
-            // 绘制连线
-            drawConnections();
-            
-            // 更新和绘制粒子
-            particles.forEach(p => {
-                p.update();
-                p.draw();
             });
             
-            requestAnimationFrame(animate);
-        }
-        
-        // 鼠标追踪
-        window.addEventListener('mousemove', (e) => {
-            mouse.x = e.clientX;
-            mouse.y = e.clientY;
-        });
-        
-        window.addEventListener('mouseleave', () => {
-            mouse.x = null;
-            mouse.y = null;
-        });
-        
-        // 窗口大小调整
-        window.addEventListener('resize', () => {
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * width;
+                    this.y = Math.random() * height;
+                    this.vx = (Math.random() - 0.5) * 0.5;
+                    this.vy = (Math.random() - 0.5) * 0.5;
+                    this.size = Math.random() * 2 + 1.5;
+                    this.brightness = Math.random() * 0.4 + 0.6;
+                    this.weight = 1;
+                    // 使用加权数组：GOLD占8份，其他各1份，GOLD约42%，加上CODE_COMMENT等黄色系可达2/3
+                    this.typeKey = WEIGHTED_TYPES[Math.floor(Math.random() * WEIGHTED_TYPES.length)];
+                    this.type = SPIDER_TYPES[this.typeKey];
+                    this.pulsePhase = Math.random() * Math.PI * 2;
+                    this.weavingStrength = 0;
+                }
+                
+                update() {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    if (this.x < 0 || this.x > width) this.vx *= -1;
+                    if (this.y < 0 || this.y > height) this.vy *= -1;
+                    
+                    // 结网动画 - 粒子向中心聚集并形成网络
+                    if (isWeaving) {
+                        this.weavingStrength = Math.min(this.weavingStrength + 0.02, 1);
+                        const centerX = width / 2;
+                        const centerY = height / 2;
+                        const dx = centerX - this.x;
+                        const dy = centerY - this.y;
+                        // 向中心聚集
+                        this.vx += dx * 0.00015 * this.weavingStrength;
+                        this.vy += dy * 0.00015 * this.weavingStrength;
+                        // 减速稳定
+                        this.vx *= 0.98;
+                        this.vy *= 0.98;
+                    } else {
+                        this.weavingStrength = Math.max(this.weavingStrength - 0.05, 0);
+                    }
+                }
+                
+                getCurrentColor() {
+                    if (this.type.colors) {
+                        if (this.type.glitch) {
+                            // 赛博朋克闪烁
+                            const idx = Math.floor(frameCount / 10) % 2;
+                            return this.type.colors[idx];
+                        }
+                        // 渐变混合
+                        return this.type.colors[0];
+                    }
+                    return this.type.color;
+                }
+                
+                draw() {
+                    const color = this.getCurrentColor();
+                    const pulse = Math.sin(frameCount * (this.type.pulseSpeed || 0.03) + this.pulsePhase);
+                    const glowSize = this.size * (2 + pulse * 0.5);
+                    
+                    // 绘制光晕
+                    ctx.beginPath();
+                    if (this.type.shape === 'square') {
+                        ctx.rect(this.x - glowSize, this.y - glowSize, glowSize * 2, glowSize * 2);
+                    } else if (this.type.sharp) {
+                        // 尖锐形状
+                        ctx.moveTo(this.x, this.y - glowSize);
+                        ctx.lineTo(this.x + glowSize * 0.7, this.y + glowSize * 0.5);
+                        ctx.lineTo(this.x - glowSize * 0.7, this.y + glowSize * 0.5);
+                        ctx.closePath();
+                    } else {
+                        ctx.arc(this.x, this.y, glowSize, 0, Math.PI * 2);
+                    }
+                    ctx.fillStyle = 'rgba(' + color + ', ' + (this.brightness * 0.25) + ')';
+                    ctx.fill();
+                    
+                    // 绘制核心
+                    ctx.beginPath();
+                    if (this.type.shape === 'square') {
+                        ctx.rect(this.x - this.size, this.y - this.size, this.size * 2, this.size * 2);
+                    } else if (this.type.sharp) {
+                        ctx.moveTo(this.x, this.y - this.size);
+                        ctx.lineTo(this.x + this.size * 0.6, this.y + this.size * 0.4);
+                        ctx.lineTo(this.x - this.size * 0.6, this.y + this.size * 0.4);
+                        ctx.closePath();
+                    } else {
+                        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    }
+                    ctx.fillStyle = 'rgba(' + color + ', ' + this.brightness + ')';
+                    ctx.fill();
+                    
+                    // 特殊效果
+                    if (this.type.hasStardust && Math.random() > 0.7) {
+                        // 星尘粒子
+                        for (let i = 0; i < 3; i++) {
+                            const sx = this.x + (Math.random() - 0.5) * 30;
+                            const sy = this.y + (Math.random() - 0.5) * 30;
+                            ctx.beginPath();
+                            ctx.arc(sx, sy, Math.random() * 1.5, 0, Math.PI * 2);
+                            ctx.fillStyle = 'rgba(255, 255, 255, ' + (Math.random() * 0.5) + ')';
+                            ctx.fill();
+                        }
+                    }
+                    
+                    if (this.type.hasGhost && Math.random() > 0.85) {
+                        // 残影效果
+                        ctx.beginPath();
+                        ctx.arc(this.x - this.vx * 10, this.y - this.vy * 10, this.size * 0.7, 0, Math.PI * 2);
+                        ctx.fillStyle = 'rgba(' + color + ', 0.2)';
+                        ctx.fill();
+                    }
+                    
+                    if (this.type.hasBubbles && frameCount % 60 < 30) {
+                        // 注释气泡
+                        ctx.beginPath();
+                        ctx.arc(this.x + 15, this.y - 15, 4, 0, Math.PI * 2);
+                        ctx.fillStyle = 'rgba(254, 240, 138, 0.4)';
+                        ctx.fill();
+                    }
+                    
+                    if (this.type.hasStructure && frameCount % 90 < 45) {
+                        // 结构线
+                        ctx.beginPath();
+                        ctx.moveTo(this.x - 20, this.y);
+                        ctx.lineTo(this.x + 20, this.y);
+                        ctx.strokeStyle = 'rgba(30, 58, 138, 0.3)';
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    }
+                    
+                    if (this.type.hasCloud && Math.random() > 0.9) {
+                        // 祥云效果
+                        ctx.beginPath();
+                        ctx.arc(this.x + 12, this.y - 8, 5, 0, Math.PI * 2);
+                        ctx.arc(this.x + 18, this.y - 5, 4, 0, Math.PI * 2);
+                        ctx.fillStyle = 'rgba(220, 38, 38, 0.2)';
+                        ctx.fill();
+                    }
+                    
+                    if (this.type.hasChart && frameCount % 120 < 60) {
+                        // 图表图标
+                        ctx.fillStyle = 'rgba(59, 130, 246, 0.4)';
+                        ctx.fillRect(this.x + 12, this.y - 8, 3, 8);
+                        ctx.fillRect(this.x + 17, this.y - 12, 3, 12);
+                    }
+                    
+                    if (this.type.hasCitation && frameCount % 100 < 50) {
+                        // 引用标记
+                        ctx.fillStyle = 'rgba(22, 101, 52, 0.4)';
+                        ctx.font = '10px sans-serif';
+                        ctx.fillText('"', this.x + 15, this.y - 5);
+                    }
+                    
+                    if (this.type.hasFire && Math.random() > 0.92) {
+                        // 火焰图标
+                        ctx.fillStyle = 'rgba(249, 115, 22, 0.6)';
+                        ctx.font = '10px sans-serif';
+                        ctx.fillText('🔥', this.x + 12, this.y - 8);
+                    }
+                }
+            }
+            
+            function initCanvas() {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+            }
+            
+            function initParticles() {
+                particles = [];
+                let count = Math.floor((width * height) / 10000);
+                count = Math.max(CONFIG.MIN_PARTICLES, Math.min(CONFIG.MAX_PARTICLES, count));
+                for (let i = 0; i < count; i++) {
+                    particles.push(new Particle());
+                }
+            }
+            
+            function drawConnections() {
+                const maxDistance = isWeaving ? 400 : 150;
+                const maxOpacity = isWeaving ? 0.95 : 0.35;
+                const maxConnections = isWeaving ? 5 : 2;
+                
+                for (let i = 0; i < particles.length; i++) {
+                    let connectionCount = 0;
+                    for (let j = i + 1; j < particles.length; j++) {
+                        if (connectionCount >= maxConnections) break;
+                        const dx = particles[i].x - particles[j].x;
+                        const dy = particles[i].y - particles[j].y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance < maxDistance) {
+                            const opacity = (1 - distance / maxDistance) * maxOpacity;
+                            // 结网时使用金色高亮连线
+                            const lineColor = isWeaving ? '255, 215, 0' : particles[i].getCurrentColor();
+                            const lineWidth = isWeaving ? 1.2 : 0.5;
+                            
+                            ctx.beginPath();
+                            ctx.moveTo(particles[i].x, particles[i].y);
+                            ctx.lineTo(particles[j].x, particles[j].y);
+                            ctx.strokeStyle = 'rgba(' + lineColor + ', ' + opacity + ')';
+                            ctx.lineWidth = lineWidth;
+                            ctx.stroke();
+                            connectionCount++;
+                        }
+                    }
+                }
+                
+                // 鼠标连线
+                if (mouse.x && mouse.y) {
+                    particles.forEach(function(p) {
+                        const dx = p.x - mouse.x, dy = p.y - mouse.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        if (distance < 200) {
+                            const opacity = (1 - distance / 200) * 0.6;
+                            ctx.beginPath();
+                            ctx.moveTo(p.x, p.y);
+                            ctx.lineTo(mouse.x, mouse.y);
+                            ctx.strokeStyle = 'rgba(' + p.getCurrentColor() + ', ' + opacity + ')';
+                            ctx.lineWidth = 0.8;
+                            ctx.stroke();
+                        }
+                    });
+                }
+            }
+            
+            function animate(currentTime) {
+                animationId = requestAnimationFrame(animate);
+                frameCount++;
+                const deltaTime = currentTime - lastFrameTime;
+                if (deltaTime < frameInterval) return;
+                lastFrameTime = currentTime - (deltaTime % frameInterval);
+                ctx.clearRect(0, 0, width, height);
+                drawConnections();
+                particles.forEach(function(p) { p.update(); p.draw(); });
+            }
+            
+            window.addEventListener('mousemove', function(e) {
+                mouse.x = e.clientX;
+                mouse.y = e.clientY;
+            });
+            window.addEventListener('mouseleave', function() {
+                mouse.x = null;
+                mouse.y = null;
+            });
+            window.addEventListener('touchmove', function(e) {
+                if (e.touches.length > 0) {
+                    mouse.x = e.touches[0].clientX;
+                    mouse.y = e.touches[0].clientY;
+                }
+            }, { passive: true });
+            window.addEventListener('touchend', function() {
+                mouse.x = null;
+                mouse.y = null;
+            });
+            window.addEventListener('resize', function() {
+                initCanvas();
+                initParticles();
+            });
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden) {
+                    if (animationId) { cancelAnimationFrame(animationId); animationId = null; }
+                } else {
+                    if (!animationId) animate(0);
+                }
+            });
+            
             initCanvas();
             initParticles();
-        });
+            animate(0);
+            
+            return {
+                setWeaving: function(value) { 
+                    isWeaving = value;
+                    if (!value) {
+                        // 散开效果
+                        particles.forEach(function(p) {
+                            p.vx = (Math.random() - 0.5) * 4;
+                            p.vy = (Math.random() - 0.5) * 4;
+                            p.weavingStrength = 0;
+                        });
+                        setTimeout(function() {
+                            particles.forEach(function(p) {
+                                p.vx = (Math.random() - 0.5) * 0.5;
+                                p.vy = (Math.random() - 0.5) * 0.5;
+                            });
+                        }, 600);
+                    }
+                },
+                scatter: function() {
+                    particles.forEach(function(p) {
+                        p.vx = (Math.random() - 0.5) * 3;
+                        p.vy = (Math.random() - 0.5) * 3;
+                    });
+                    setTimeout(function() {
+                        particles.forEach(function(p) {
+                            p.vx = (Math.random() - 0.5) * 0.5;
+                            p.vy = (Math.random() - 0.5) * 0.5;
+                        });
+                    }, 500);
+                }
+            };
+        })();
         
-        // 初始化
-        initCanvas();
-        initParticles();
-        animate();
+        // ==================== 输入交互模块 ====================
+        const InputModule = (function() {
+            const promptInput = document.getElementById('promptInput');
+            const charCounter = document.getElementById('charCounter');
+            let history = JSON.parse(localStorage.getItem('promptHistory') || '[]');
+            let historyIndex = -1;
+            
+            promptInput.addEventListener('input', function() {
+                const len = promptInput.value.length;
+                charCounter.textContent = len + '/' + CONFIG.MAX_PROMPT_LENGTH;
+                charCounter.classList.toggle('warning', len > CONFIG.MAX_PROMPT_LENGTH * 0.9);
+            });
+            
+            promptInput.addEventListener('keydown', function(e) {
+                if (e.key === 'ArrowUp' && promptInput.selectionStart === 0) {
+                    e.preventDefault();
+                    if (historyIndex < history.length - 1) {
+                        historyIndex++;
+                        promptInput.value = history[historyIndex];
+                    }
+                } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    if (historyIndex > 0) {
+                        historyIndex--;
+                        promptInput.value = history[historyIndex];
+                    } else if (historyIndex === 0) {
+                        historyIndex = -1;
+                        promptInput.value = '';
+                    }
+                } else if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    generate();
+                }
+            });
+            
+            window.addEventListener('load', function() {
+                promptInput.focus();
+            });
+            
+            return {
+                addToHistory: function(prompt) {
+                    history = history.filter(function(p) { return p !== prompt; });
+                    history.unshift(prompt);
+                    if (history.length > CONFIG.HISTORY_LIMIT) {
+                        history = history.slice(0, CONFIG.HISTORY_LIMIT);
+                    }
+                    localStorage.setItem('promptHistory', JSON.stringify(history));
+                    historyIndex = -1;
+                }
+            };
+        })();
         
-        // ==================== 业务逻辑 ====================
-        
+        // ==================== 生成业务模块 ====================
         const promptInput = document.getElementById('promptInput');
         const generateBtn = document.getElementById('generateBtn');
         const resultSection = document.getElementById('resultSection');
         const resultContent = document.getElementById('resultContent');
         const weavingAnimation = document.getElementById('weavingAnimation');
+        const weavingOverlay = document.getElementById('weavingOverlay');
+        const weavingText = document.getElementById('weavingText');
         
-        // 设置Prompt（点击标签）
-        function setPrompt(tagName, prompt) {
-            promptInput.value = prompt;
-            promptInput.focus();
-            
-            // 高亮标签
-            document.querySelectorAll('.tag').forEach(tag => tag.classList.remove('active'));
-            event.target.closest('.tag').classList.add('active');
-        }
+        let isGenerating = false;
+        let loadingTextInterval = null;
+        let generateTimeout = null;
         
-        // 生成内容
-        async function generate() {
-            const prompt = promptInput.value.trim();
-            
-            if (!prompt) {
-                promptInput.focus();
-                promptInput.style.animation = 'shake 0.5s';
-                setTimeout(() => promptInput.style.animation = '', 500);
-                return;
-            }
-            
-            // 开始结网动画
-            isWeaving = true;
-            weavingAnimation.classList.add('show');
-            generateBtn.disabled = true;
-            generateBtn.innerHTML = '<div class="spinner"></div><span>结网中...</span>';
-            generateBtn.classList.add('spinning');
-            
-            // 隐藏之前的结果
-            resultSection.classList.remove('show');
-            
-            // 模拟API调用（2-3秒）
-            await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 1000));
-            
-            // 生成结果（这里接入Kimi API）
-            const result = await mockGenerate(prompt);
-            
-            // 显示结果
-            resultContent.textContent = result;
-            resultSection.classList.add('show');
-            
-            // 恢复状态
-            isWeaving = false;
-            weavingAnimation.classList.remove('show');
-            generateBtn.disabled = false;
-            generateBtn.innerHTML = '<span>生成</span>';
-            generateBtn.classList.remove('spinning');
-            
-            // 滚动到结果
-            resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-        
-        // 模拟生成（实际接入Kimi API）
-        async function mockGenerate(prompt) {
-            // 这里替换为真实的Kimi API调用
-            // const response = await fetch('/api/generate', {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify({ prompt })
-            // });
-            // const data = await response.json();
-            // return data.result;
-            
-            // 模拟结果
-            const mockResults = {
-                '诗': `秋风起，落叶黄，
-万山红遍层林染。
-寒蝉凄切声声慢，
-独坐西窗夜未央。
-
-霜降已过雁南飞，
-菊花残满地香。
-一年好景君须记，
-最是橙黄橘绿时。`,
-                '代码': `# Python爬虫示例
-import requests
-from bs4 import BeautifulSoup
-
-def crawl_web(url):
-    try:
-        response = requests.get(url, timeout=10)
-        soup = BeautifulSoup(response.text, 'html.parser')
-        
-        # 提取标题
-        title = soup.find('title').text
-        
-        # 提取所有链接
-        links = [a['href'] for a in soup.find_all('a', href=True)]
-        
-        return {
-            'title': title,
-            'links': links,
-            'status': 'success'
-        }
-    except Exception as e:
-        return {'error': str(e)}
-
-# 使用示例
-result = crawl_web('https://example.com')
-print(result)`,
-                'default': `根据您的需求「${prompt}」，我已为您生成以下内容：
-
-这是一个示例结果。在实际部署中，这里会接入Kimi API，根据您的输入生成真实的内容。
-
-生成的内容可能包括：
-• 文章、故事、诗歌
-• 代码、脚本、算法
-• 设计方案、创意构思
-• 数据分析、报告
-• 计划、大纲、策略
-
-请继续输入您的需求，体验完整的生成能力。`
+        function debounce(fn, delay) {
+            let timer = null;
+            return function() {
+                const args = arguments;
+                if (timer) clearTimeout(timer);
+                timer = setTimeout(function() { fn.apply(null, args); }, delay);
             };
-            
-            if (prompt.includes('诗') || prompt.includes('秋天')) {
-                return mockResults['诗'];
-            } else if (prompt.includes('代码') || prompt.includes('Python')) {
-                return mockResults['代码'];
-            } else {
-                return mockResults['default'].replace('${prompt}', prompt);
-            }
         }
         
-        // 复制结果
-        function copyResult() {
-            const text = resultContent.textContent;
-            navigator.clipboard.writeText(text).then(() => {
-                const btn = event.target;
-                const originalText = btn.textContent;
-                btn.textContent = '✓ 已复制';
-                setTimeout(() => btn.textContent = originalText, 2000);
+        function startLoadingText() {
+            let index = 0;
+            loadingTextInterval = setInterval(function() {
+                index = (index + 1) % CONFIG.LOADING_TEXTS.length;
+                weavingText.textContent = CONFIG.LOADING_TEXTS[index];
+            }, 500);
+        }
+        
+        function stopLoadingText() {
+            if (loadingTextInterval) {
+                clearInterval(loadingTextInterval);
+                loadingTextInterval = null;
+            }
+            weavingText.textContent = CONFIG.LOADING_TEXTS[0];
+        }
+        
+        function showToast(message, type) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast' + (type === 'error' ? ' error' : '');
+            toast.classList.add('show');
+            setTimeout(function() { toast.classList.remove('show'); }, 2000);
+        }
+        
+        // 推荐场景数据
+        const recommendScenes = [
+            { icon: '📝', text: '帮我写一篇关于人工智能的科普文章', prompt: '帮我写一篇面向普通读者的人工智能科普文章，要求结构清晰、语言通俗易懂、避免过多专业术语，字数800字左右' },
+            { icon: '💻', text: '用Python写一个网页爬虫脚本', prompt: '请用Python编写一个功能完整的网页数据爬虫脚本，包含请求头设置、异常处理、数据解析和结果保存功能，代码需要有详细注释' },
+            { icon: '📧', text: '写一封正式的商务合作邮件', prompt: '帮我写一封正式的商务合作邮件，语气专业礼貌，包含自我介绍、合作意向说明、期望回复时间，字数控制在300字以内' },
+            { icon: '📋', text: '制定一个30天健身减脂计划', prompt: '请为我制定一个详细的30天健身减脂计划，包含每周训练安排、饮食建议、注意事项，适合初学者，目标减重3-5公斤' },
+            { icon: '🔍', text: '总结量子计算的最新进展', prompt: '请帮我查找并总结量子计算领域的最新进展，包括技术突破、主要玩家、应用场景和未来发展趋势' },
+            { icon: '📊', text: '分析销售数据找出增长趋势', prompt: '请分析以下数据并给出洞察：假设有一份销售数据，包含各产品线的月度销售额，帮我找出增长趋势、季节性规律和优化建议' },
+            { icon: '🎵', text: '写一首关于青春的歌词', prompt: '帮我写一首关于青春回忆的流行歌曲歌词，主题温暖治愈，结构包含主歌、副歌、桥段，语言优美有画面感' },
+            { icon: '🎨', text: '为环保水杯设计营销方案', prompt: '请帮我进行创意构思：为一个新推出的环保水杯产品设计营销创意方案，包含产品卖点、目标人群、推广渠道和slogan建议' },
+            { icon: '🍳', text: '教我做一道家常菜', prompt: '请详细教我如何做一道简单易学的家常菜，包括所需食材、步骤说明、烹饪技巧和注意事项' },
+            { icon: '✈️', text: '规划一份云南旅游攻略', prompt: '帮我规划一份云南7天旅游攻略，包含必去景点、美食推荐、交通建议和住宿选择，预算控制在5000元以内' },
+            { icon: '📚', text: '推荐几本值得读的好书', prompt: '请根据我的兴趣推荐5本值得阅读的好书，包含书名、作者、简介和推荐理由' },
+            { icon: '💼', text: '帮我优化一下简历', prompt: '请帮我优化简历，我是一名有3年经验的前端工程师，希望突出技术能力和项目经验' }
+        ];
+        
+        // 随机获取3条推荐
+        function getRandomRecommendations() {
+            const shuffled = [...recommendScenes].sort(function() { return 0.5 - Math.random(); });
+            return shuffled.slice(0, 3);
+        }
+        
+        // 渲染推荐列表
+        function renderRecommendations() {
+            const list = document.getElementById('recommendList');
+            const items = getRandomRecommendations();
+            list.innerHTML = '';
+            items.forEach(function(item) {
+                const div = document.createElement('div');
+                div.className = 'recommend-item';
+                div.innerHTML = item.icon + ' ' + item.text;
+                div.addEventListener('click', function() {
+                    promptInput.value = item.prompt;
+                    promptInput.focus();
+                    promptInput.dispatchEvent(new Event('input'));
+                });
+                list.appendChild(div);
             });
         }
         
-        // 重新生成
+        // 刷新按钮
+        document.getElementById('refreshBtn').addEventListener('click', renderRecommendations);
+        
+        // 初始化推荐
+        renderRecommendations();
+        
+        function renderResult(content) {
+            let html = content
+                .replace(/### (.*$)/gm, '<h3>$1</h3>')
+                .replace(/## (.*$)/gm, '<h2>$1</h2>')
+                .replace(/# (.*$)/gm, '<h1>$1</h1>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/`([^`]+)`/g, '<code>$1</code>')
+                .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
+                .replace(/^\> (.*$)/gm, '<blockquote>$1</blockquote>')
+                .replace(/^\- (.*$)/gm, '<li>$1</li>')
+                .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+                .replace(/\n/g, '<br>');
+            resultContent.innerHTML = html;
+        }
+        
+        function renderError(message) {
+            resultContent.innerHTML = '<div class="error-state"><h3>⚠️ 生成失败</h3><p>' + message + '</p><p style="margin-top: 12px; font-size: 0.9rem;">请检查网络连接后重试</p></div>';
+        }
+        
+        function mockGenerate(prompt) {
+            return new Promise(function(resolve) {
+                setTimeout(function() {
+                    if (prompt.indexOf('文章') !== -1 || prompt.indexOf('科普') !== -1) {
+                        resolve('## 人工智能：改变世界的技术力量\n\n人工智能（AI）正在以前所未有的速度改变着我们的生活和工作方式。从智能手机的语音助手到自动驾驶汽车，AI技术已经深入到我们日常生活的方方面面。\n\n### 核心应用场景\n\n**1. 医疗健康**\nAI在医疗领域的应用正在 revolutionize 疾病诊断和治疗。通过深度学习算法，AI可以分析医学影像，辅助医生发现早期癌症病变，准确率高达95%以上。\n\n**2. 金融服务**\n银行和金融机构利用AI进行风险评估、欺诈检测和智能投顾。AI系统可以实时分析海量交易数据，识别异常模式，保护用户资产安全。\n\n**3. 智能制造**\n在工厂车间，AI驱动的机器人正在承担更多复杂任务。预测性维护系统可以提前发现设备故障，减少停机时间，提高生产效率。\n\n### 未来展望\n\n随着技术的不断进步，AI将在更多领域发挥重要作用。我们需要在享受技术红利的同时，也要关注伦理和隐私问题，确保AI技术造福全人类。');
+                    } else if (prompt.indexOf('代码') !== -1 || prompt.indexOf('Python') !== -1) {
+                        resolve('```python\nimport requests\nfrom bs4 import BeautifulSoup\nfrom urllib.parse import urljoin, urlparse\nimport time\nimport json\n\nclass WebCrawler:\n    """\n    通用网页爬虫类\n    支持递归爬取、异常处理、数据保存\n    """\n    \n    def __init__(self, base_url, delay=1):\n        self.base_url = base_url\n        self.domain = urlparse(base_url).netloc\n        self.visited = set()\n        self.delay = delay\n        self.session = requests.Session()\n        self.session.headers.update({\n            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"\n        })\n    \n    def fetch(self, url):\n        try:\n            time.sleep(self.delay)\n            response = self.session.get(url, timeout=10)\n            response.raise_for_status()\n            return response.text\n        except requests.RequestException as e:\n            print(f"请求失败 {url}: {e}")\n            return None\n    \n    def parse(self, html, url):\n        soup = BeautifulSoup(html, "html.parser")\n        data = {\n            "url": url,\n            "title": soup.title.text.strip() if soup.title else "无标题",\n            "links": [],\n            "paragraphs": []\n        }\n        for link in soup.find_all("a", href=True):\n            absolute_url = urljoin(url, link["href"])\n            if urlparse(absolute_url).netloc == self.domain:\n                data["links"].append(absolute_url)\n        for p in soup.find_all("p"):\n            text = p.get_text().strip()\n            if len(text) > 20:\n                data["paragraphs"].append(text)\n        return data\n    \n    def crawl(self, url=None, max_pages=10):\n        if url is None:\n            url = self.base_url\n        if len(self.visited) >= max_pages or url in self.visited:\n            return []\n        self.visited.add(url)\n        html = self.fetch(url)\n        if not html:\n            return []\n        data = self.parse(html, url)\n        results = [data]\n        for link in data["links"][:5]:\n            if link not in self.visited:\n                results.extend(self.crawl(link, max_pages))\n        return results\n\n# 使用示例\ncrawler = WebCrawler("https://example.com")\nresults = crawler.crawl(max_pages=5)\nprint(results)\n```');
+                    } else {
+                        resolve('## 根据您的需求生成\n\n我已收到您的需求：**"' + prompt + '"**\n\n这是一个示例结果，展示了因子智蛛的生成能力。在实际使用中，这里会接入AI大模型API，根据您的具体需求生成高质量的内容。\n\n### 我能为您做什么？\n\n- **文章创作** - 各类主题的文章、博客、报告\n- **代码编写** - Python、JavaScript、Java等多种语言\n- **邮件撰写** - 商务邮件、求职信、邀请函\n- **计划制定** - 健身计划、学习计划、项目规划\n- **资料查询** - 知识总结、文献综述、趋势分析\n- **数据分析** - 数据解读、可视化建议、洞察提取\n- **创意构思** - 营销方案、产品设计、故事创作\n\n### 使用建议\n\n1. 描述越详细，生成结果越符合预期\n2. 可以指定格式、字数、风格等要求\n3. 不满意可以重新生成，每次结果都不同\n\n请继续输入您的需求，体验完整的AI生成能力！');
+                    }
+                }, 500);
+            });
+        }
+        
+        function generate() {
+            if (isGenerating) return;
+            const prompt = promptInput.value.trim();
+            if (!prompt) {
+                promptInput.classList.add('error');
+                showToast('请输入内容后再生成', 'error');
+                setTimeout(function() { promptInput.classList.remove('error'); }, 500);
+                promptInput.focus();
+                return;
+            }
+            if (prompt.length > CONFIG.MAX_PROMPT_LENGTH) {
+                showToast('输入内容超过' + CONFIG.MAX_PROMPT_LENGTH + '字符限制', 'error');
+                return;
+            }
+            
+            isGenerating = true;
+            InputModule.addToHistory(prompt);
+            
+            SpiderCanvas.setWeaving(true);
+            weavingAnimation.classList.add('show');
+            weavingOverlay.classList.add('show');
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '<div class="spinner"></div><span>结网中...</span>';
+            generateBtn.classList.add('spinning');
+            startLoadingText();
+            resultSection.classList.remove('show');
+            
+            mockGenerate(prompt).then(function(result) {
+                renderResult(result);
+                resultSection.classList.add('show');
+                SpiderCanvas.scatter();
+                setTimeout(function() {
+                    resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 100);
+            }).catch(function(error) {
+                renderError(error.message || '生成失败，请稍后重试');
+                resultSection.classList.add('show');
+            }).finally(function() {
+                SpiderCanvas.setWeaving(false);
+                weavingAnimation.classList.remove('show');
+                weavingOverlay.classList.remove('show');
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = '<span>生成</span>';
+                generateBtn.classList.remove('spinning');
+                stopLoadingText();
+                isGenerating = false;
+            });
+        }
+        
+        function copyResult() {
+            const text = resultContent.innerText;
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(function() {
+                    showToast('✓ 已复制到剪贴板');
+                }).catch(function() {
+                    fallbackCopy(text);
+                });
+            } else {
+                fallbackCopy(text);
+            }
+        }
+        
+        function fallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                const success = document.execCommand('copy');
+                if (success) {
+                    showToast('✓ 已复制到剪贴板');
+                } else {
+                    showToast('复制失败，请手动复制', 'error');
+                }
+            } catch (err) {
+                showToast('复制失败，请手动复制', 'error');
+            }
+            document.body.removeChild(textarea);
+        }
+        
+        function exportResult() {
+            const text = resultContent.innerText;
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const date = new Date().toLocaleDateString();
+            a.download = '因子智蛛生成结果_' + date + '.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('✓ 文件已导出');
+        }
+        
+        function speakResult() {
+            const text = resultContent.innerText;
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'zh-CN';
+                utterance.rate = 1;
+                utterance.pitch = 1;
+                utterance.onstart = function() { showToast('🔊 开始朗读'); };
+                utterance.onend = function() { showToast('朗读结束'); };
+                window.speechSynthesis.speak(utterance);
+            } else {
+                showToast('您的浏览器不支持语音朗读', 'error');
+            }
+        }
+        
         function regenerate() {
             generate();
         }
         
-        // 回车生成
-        promptInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                generate();
+
+        
+        // 生成按钮事件
+        generateBtn.addEventListener('click', function() {
+            if (generateTimeout) clearTimeout(generateTimeout);
+            generateTimeout = setTimeout(generate, CONFIG.DEBOUNCE_DELAY);
+        });
+        
+        // 功能按钮事件
+        document.getElementById('copyBtn').addEventListener('click', copyResult);
+        document.getElementById('exportBtn').addEventListener('click', exportResult);
+        document.getElementById('speakBtn').addEventListener('click', speakResult);
+        document.getElementById('regenerateBtn').addEventListener('click', regenerate);
+        
+
+        
+        // 模态框
+        const modalContents = {
+            privacy: {
+                title: '隐私政策',
+                body: '<h3>信息收集</h3><p>我们仅收集您主动输入的生成需求内容，用于提供AI生成服务。您的输入历史可选择性保存在本地浏览器中。</p><h3>信息使用</h3><p>我们使用您的输入 solely 用于生成您请求的内容。我们不会将您的个人信息出售或分享给第三方。</p><h3>数据安全</h3><p>我们采用行业标准的加密技术保护您的数据传输安全。本地存储的数据仅保存在您的设备上。</p><h3>Cookie使用</h3><p>我们使用Cookie来改善用户体验，包括保存您的偏好设置和历史记录。</p>'
+            },
+            terms: {
+                title: '用户协议',
+                body: '<h3>服务条款</h3><p>欢迎使用因子智蛛AI生成服务。使用本服务即表示您同意以下条款：</p><h3>使用规范</h3><p>用户不得使用本服务生成违法、侵权、色情、暴力或其他有害内容。我们有权对违规内容进行拦截和处理。</p><h3>知识产权</h3><p>用户输入的内容归用户所有。AI生成的内容，用户拥有使用权，但不得声称其为人类原创作品。</p><h3>服务变更</h3><p>我们保留随时修改或中断服务的权利，恕不另行通知。</p>'
+            },
+            disclaimer: {
+                title: '免责声明',
+                body: '<h3>内容声明</h3><p>因子智蛛生成的内容均由AI模型自动生成，仅供参考。我们不对生成内容的准确性、完整性、适用性做出任何保证。</p><h3>使用风险</h3><p>用户应自行判断生成内容的可靠性，并承担使用风险。对于因使用生成内容而造成的任何损失，我们不承担责任。</p><h3>专业建议</h3><p>涉及医疗、法律、金融等专业领域的内容，请务必咨询专业人士，切勿直接依赖AI生成内容。</p><h3>版权说明</h3><p>AI生成内容可能与他人作品相似，用户使用时请注意版权问题。</p>'
+            },
+            feedback: {
+                title: '反馈建议',
+                body: '<h3>我们重视您的反馈</h3><p>如果您在使用过程中遇到任何问题，或有任何建议，欢迎通过以下方式联系我们：</p><p><strong>邮箱：</strong>feedback@chenshushi.tech</p><p><strong>GitHub：</strong>github.com/spider-agent/issues</p><h3>常见问题</h3><p>• 生成速度慢：请检查网络连接，或稍后重试</p><p>• 生成内容不满意：尝试更详细的描述您的需求</p><p>• 功能建议：我们持续迭代，您的建议可能被采纳</p>'
+            },
+            about: {
+                title: '关于我们',
+                body: '<h3>关于因子智蛛</h3><p>因子智蛛是一款轻量级AI生成工具，致力于让每个人都能轻松使用AI能力。我们的愿景是「一句话，生成万物」。</p><h3>技术架构</h3><p>基于先进的大语言模型技术，结合精心设计的Prompt工程，为用户提供高质量的生成体验。</p><h3>联系我们</h3><p>官网：chenshushi.tech</p><p>邮箱：contact@chenshushi.tech</p>'
+            }
+        };
+        
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
+        const modalClose = document.getElementById('modalClose');
+        
+        document.querySelectorAll('.footer-links a[data-modal]').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const type = this.getAttribute('data-modal');
+                const content = modalContents[type];
+                if (content) {
+                    modalTitle.textContent = content.title;
+                    modalBody.innerHTML = content.body;
+                    modalOverlay.classList.add('show');
+                }
+            });
+        });
+        
+        modalClose.addEventListener('click', function() {
+            modalOverlay.classList.remove('show');
+        });
+        
+        modalOverlay.addEventListener('click', function(e) {
+            if (e.target === modalOverlay) {
+                modalOverlay.classList.remove('show');
             }
         });
         
-        // 输入框placeholder动画
-        const placeholders = [
-            '我想写一首关于秋天的诗...',
-            '帮我写一段Python爬虫代码...',
-            '设计一个科技公司的Logo...',
-            '分析这份销售数据...',
-            '制定一个30天健身计划...'
-        ];
-        
-        let placeholderIndex = 0;
-        let charIndex = 0;
-        let isDeleting = false;
-        
-        function typePlaceholder() {
-            const current = placeholders[placeholderIndex];
-            
-            if (isDeleting) {
-                promptInput.setAttribute('placeholder', current.substring(0, charIndex - 1));
-                charIndex--;
-            } else {
-                promptInput.setAttribute('placeholder', current.substring(0, charIndex + 1));
-                charIndex++;
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                modalOverlay.classList.remove('show');
             }
-            
-            let typeSpeed = isDeleting ? 50 : 100;
-            
-            if (!isDeleting && charIndex === current.length) {
-                typeSpeed = 2000;
-                isDeleting = true;
-            } else if (isDeleting && charIndex === 0) {
-                isDeleting = false;
-                placeholderIndex = (placeholderIndex + 1) % placeholders.length;
-                typeSpeed = 500;
-            }
-            
-            setTimeout(typePlaceholder, typeSpeed);
-        }
-        
-        // 启动placeholder动画
-        typePlaceholder();
-        
-        // 添加shake动画
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes shake {
-                0%, 100% { transform: translateX(0); }
-                25% { transform: translateX(-5px); }
-                75% { transform: translateX(5px); }
-            }
-        `;
-        document.head.appendChild(style);
+        });
     </script>
 </body>
 </html>
