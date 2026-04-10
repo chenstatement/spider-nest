@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ᄽ🤖ᄿ因子智蛛 - 一句话，生成万物</title>
+    <title>因子智蛛 - 一句话，生成万物</title>
     <meta name="description" content="因子智蛛，一站式AI生成工具，一句话生成文章、代码、设计方案、数据分析、创意内容，全场景覆盖，开箱即用">
     <meta name="keywords" content="AI生成,AI写作,AI代码,因子智蛛,AI工具,一句话生成">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -638,205 +638,258 @@
     <script>
         // ==================== 配置常量 ====================
         const CONFIG = {
-            MAX_PARTICLES: 120,
-            MIN_PARTICLES: 50,
+            MAX_SPIDERS: 80,
+            MIN_SPIDERS: 40,
             MAX_PROMPT_LENGTH: 2000,
             HISTORY_LIMIT: 20,
             DEBOUNCE_DELAY: 300,
             LOADING_TEXTS: ['蜘蛛结网中...', '解析需求中...', '生成内容中...', '编织答案中...']
         };
         
-        // ==================== 蜘蛛网络动画模块 ====================
+        // ==================== 智能蜘蛛网络动画模块 ====================
         const SpiderCanvas = (function() {
             const canvas = document.getElementById('spider-canvas');
             const ctx = canvas.getContext('2d');
-            let width, height, particles = [], mouse = { x: null, y: null };
+            let width, height, spiders = [], webThreads = [], mouse = { x: null, y: null };
             let isWeaving = false, animationId = null, lastFrameTime = 0, frameCount = 0;
+            let weavingProgress = 0, centerWeb = null;
             const frameInterval = 1000 / 60;
             
-            // 蜘蛛类型配置 - 黄色(GOLD)占2/3，其他颜色均分剩余1/3
-            const SPIDER_TYPES = {
-                GOLD: { name: 'gold', color: '255, 215, 0', glow: '255, 215, 0', weight: 8 },
-                SILVER: { name: 'silver', color: '192, 192, 192', glow: 'white', pulseSpeed: 0.02, hasStardust: true, weight: 1 },
-                GRADIENT: { name: 'gradient', colors: ['157, 78, 221', '255, 0, 110'], pulseSpeed: 0.08, hasGhost: true, weight: 1 },
-                RUST: { name: 'rust', color: '139, 0, 0', glow: '139, 0, 0', sharp: true, weight: 1 },
-                CODE_CLEAN: { name: 'codeClean', color: '0, 245, 212', glow: '0, 245, 212', shape: 'square', weight: 1 },
-                CODE_COMMENT: { name: 'codeComment', color: '254, 240, 138', glow: '254, 240, 138', hasBubbles: true, weight: 1 },
-                CODE_ARCH: { name: 'codeArch', color: '30, 58, 138', glow: '30, 58, 138', hasStructure: true, weight: 1 },
-                DESIGN_MIN: { name: 'designMin', color: '245, 245, 245', glow: '245, 245, 245', minimal: true, weight: 1 },
-                DESIGN_CYBER: { name: 'designCyber', colors: ['0, 240, 255', '255, 0, 255'], glitch: true, weight: 1 },
-                DESIGN_CHINA: { name: 'designChina', colors: ['220, 38, 38', '255, 215, 0'], hasCloud: true, weight: 1 },
-                BUSINESS: { name: 'business', color: '59, 130, 246', glow: '59, 130, 246', hasChart: true, weight: 1 },
-                ACADEMIC: { name: 'academic', colors: ['22, 101, 52', '146, 64, 14'], hasCitation: true, weight: 1 },
-                MEDIA: { name: 'media', color: '249, 115, 22', glow: '249, 115, 22', hasFire: true, weight: 1 }
-            };
+            // 蜘蛛类型配置 - 金色占主导
+            const SPIDER_TYPES = [
+                { name: 'gold', color: '255, 215, 0', glow: '255, 215, 0', weight: 12, hasLegs: true },
+                { name: 'silver', color: '192, 192, 192', glow: '255, 255, 255', weight: 1, hasStardust: true },
+                { name: 'purple', color: '157, 78, 221', glow: '200, 100, 255', weight: 1 },
+                { name: 'cyan', color: '0, 245, 212', glow: '0, 255, 230', weight: 1, shape: 'square' },
+                { name: 'blue', color: '59, 130, 246', glow: '80, 150, 255', weight: 1 },
+                { name: 'red', color: '220, 38, 38', glow: '255, 60, 60', weight: 1 },
+                { name: 'green', color: '22, 101, 52', glow: '40, 150, 80', weight: 1 },
+                { name: 'orange', color: '249, 115, 22', glow: '255, 140, 50', weight: 1 },
+                { name: 'white', color: '245, 245, 245', glow: '255, 255, 255', weight: 1, minimal: true }
+            ];
             
-            // 构建加权类型数组：GOLD占8份，其他各1份，总共19份，GOLD约42%，加上其他黄色系约2/3
+            // 构建加权数组
             const WEIGHTED_TYPES = [];
-            Object.keys(SPIDER_TYPES).forEach(function(key) {
-                const type = SPIDER_TYPES[key];
-                const weight = type.weight || 1;
-                for (let i = 0; i < weight; i++) {
-                    WEIGHTED_TYPES.push(key);
-                }
+            SPIDER_TYPES.forEach(function(t) {
+                for (let i = 0; i < t.weight; i++) WEIGHTED_TYPES.push(t);
             });
             
-            class Particle {
+            // 智能蜘蛛类
+            class SmartSpider {
                 constructor() {
                     this.x = Math.random() * width;
                     this.y = Math.random() * height;
-                    this.vx = (Math.random() - 0.5) * 0.5;
-                    this.vy = (Math.random() - 0.5) * 0.5;
-                    this.size = Math.random() * 2 + 1.5;
-                    this.brightness = Math.random() * 0.4 + 0.6;
-                    this.weight = 1;
-                    // 使用加权数组：GOLD占8份，其他各1份，GOLD约42%，加上CODE_COMMENT等黄色系可达2/3
-                    this.typeKey = WEIGHTED_TYPES[Math.floor(Math.random() * WEIGHTED_TYPES.length)];
-                    this.type = SPIDER_TYPES[this.typeKey];
-                    this.pulsePhase = Math.random() * Math.PI * 2;
+                    this.vx = (Math.random() - 0.5) * 0.6;
+                    this.vy = (Math.random() - 0.5) * 0.6;
+                    this.size = Math.random() * 2.5 + 2;
+                    this.type = WEIGHTED_TYPES[Math.floor(Math.random() * WEIGHTED_TYPES.length)];
+                    this.brightness = Math.random() * 0.3 + 0.7;
+                    this.angle = Math.random() * Math.PI * 2;
+                    this.legPhase = Math.random() * Math.PI * 2;
                     this.weavingStrength = 0;
+                    this.targetX = null;
+                    this.targetY = null;
                 }
                 
                 update() {
-                    this.x += this.vx;
-                    this.y += this.vy;
-                    if (this.x < 0 || this.x > width) this.vx *= -1;
-                    if (this.y < 0 || this.y > height) this.vy *= -1;
-                    
-                    // 结网动画 - 粒子向中心聚集并形成网络
+                    // 结网动画 - 蜘蛛向中心移动并编织
                     if (isWeaving) {
-                        this.weavingStrength = Math.min(this.weavingStrength + 0.02, 1);
+                        this.weavingStrength = Math.min(this.weavingStrength + 0.025, 1);
                         const centerX = width / 2;
                         const centerY = height / 2;
-                        const dx = centerX - this.x;
-                        const dy = centerY - this.y;
-                        // 向中心聚集
-                        this.vx += dx * 0.00015 * this.weavingStrength;
-                        this.vy += dy * 0.00015 * this.weavingStrength;
-                        // 减速稳定
-                        this.vx *= 0.98;
-                        this.vy *= 0.98;
+                        
+                        // 蜘蛛向中心聚集，形成同心圆分布
+                        const angleFromCenter = Math.atan2(this.y - centerY, this.x - centerX);
+                        const distFromCenter = Math.sqrt((this.x - centerX) ** 2 + (this.y - centerY) ** 2);
+                        const targetDist = 80 + (this.size * 15) + Math.sin(this.legPhase) * 30;
+                        
+                        const targetX = centerX + Math.cos(angleFromCenter + weavingProgress * 0.5) * targetDist;
+                        const targetY = centerY + Math.sin(angleFromCenter + weavingProgress * 0.5) * targetDist;
+                        
+                        this.vx += (targetX - this.x) * 0.003 * this.weavingStrength;
+                        this.vy += (targetY - this.y) * 0.003 * this.weavingStrength;
+                        this.vx *= 0.94;
+                        this.vy *= 0.94;
+                        
+                        // 蜘蛛旋转
+                        this.angle += 0.02 * this.weavingStrength;
                     } else {
-                        this.weavingStrength = Math.max(this.weavingStrength - 0.05, 0);
+                        this.weavingStrength = Math.max(this.weavingStrength - 0.08, 0);
+                        this.x += this.vx;
+                        this.y += this.vy;
+                        
+                        if (this.x < 0 || this.x > width) this.vx *= -1;
+                        if (this.y < 0 || this.y > height) this.vy *= -1;
                     }
-                }
-                
-                getCurrentColor() {
-                    if (this.type.colors) {
-                        if (this.type.glitch) {
-                            // 赛博朋克闪烁
-                            const idx = Math.floor(frameCount / 10) % 2;
-                            return this.type.colors[idx];
-                        }
-                        // 渐变混合
-                        return this.type.colors[0];
-                    }
-                    return this.type.color;
                 }
                 
                 draw() {
-                    const color = this.getCurrentColor();
-                    const pulse = Math.sin(frameCount * (this.type.pulseSpeed || 0.03) + this.pulsePhase);
-                    const glowSize = this.size * (2 + pulse * 0.5);
+                    const pulse = Math.sin(frameCount * 0.05 + this.legPhase);
+                    const glowSize = this.size * (2.5 + pulse * 0.3);
+                    const color = this.type.color;
+                    
+                    ctx.save();
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.angle);
+                    
+                    // 绘制蜘蛛腿（8条）
+                    if (this.type.hasLegs !== false) {
+                        ctx.strokeStyle = 'rgba(' + color + ', ' + (this.brightness * 0.6) + ')';
+                        ctx.lineWidth = 0.8;
+                        for (let i = 0; i < 8; i++) {
+                            const legAngle = (i / 8) * Math.PI * 2;
+                            const legLen = this.size * (3 + Math.sin(frameCount * 0.1 + i) * 0.5);
+                            const legBend = Math.sin(frameCount * 0.15 + i * 0.5) * 5;
+                            ctx.beginPath();
+                            ctx.moveTo(0, 0);
+                            ctx.quadraticCurveTo(
+                                Math.cos(legAngle) * legLen * 0.5 + legBend,
+                                Math.sin(legAngle) * legLen * 0.5 + legBend,
+                                Math.cos(legAngle) * legLen,
+                                Math.sin(legAngle) * legLen
+                            );
+                            ctx.stroke();
+                        }
+                    }
                     
                     // 绘制光晕
                     ctx.beginPath();
                     if (this.type.shape === 'square') {
-                        ctx.rect(this.x - glowSize, this.y - glowSize, glowSize * 2, glowSize * 2);
-                    } else if (this.type.sharp) {
-                        // 尖锐形状
-                        ctx.moveTo(this.x, this.y - glowSize);
-                        ctx.lineTo(this.x + glowSize * 0.7, this.y + glowSize * 0.5);
-                        ctx.lineTo(this.x - glowSize * 0.7, this.y + glowSize * 0.5);
-                        ctx.closePath();
+                        ctx.rect(-glowSize, -glowSize, glowSize * 2, glowSize * 2);
                     } else {
-                        ctx.arc(this.x, this.y, glowSize, 0, Math.PI * 2);
+                        ctx.arc(0, 0, glowSize, 0, Math.PI * 2);
                     }
-                    ctx.fillStyle = 'rgba(' + color + ', ' + (this.brightness * 0.25) + ')';
+                    ctx.fillStyle = 'rgba(' + color + ', ' + (this.brightness * 0.2) + ')';
                     ctx.fill();
                     
-                    // 绘制核心
+                    // 绘制蜘蛛身体（腹部）
                     ctx.beginPath();
-                    if (this.type.shape === 'square') {
-                        ctx.rect(this.x - this.size, this.y - this.size, this.size * 2, this.size * 2);
-                    } else if (this.type.sharp) {
-                        ctx.moveTo(this.x, this.y - this.size);
-                        ctx.lineTo(this.x + this.size * 0.6, this.y + this.size * 0.4);
-                        ctx.lineTo(this.x - this.size * 0.6, this.y + this.size * 0.4);
-                        ctx.closePath();
-                    } else {
-                        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                    }
+                    ctx.ellipse(0, 0, this.size * 1.2, this.size * 0.9, 0, 0, Math.PI * 2);
                     ctx.fillStyle = 'rgba(' + color + ', ' + this.brightness + ')';
                     ctx.fill();
                     
+                    // 绘制蜘蛛头胸部
+                    ctx.beginPath();
+                    ctx.ellipse(-this.size * 0.8, 0, this.size * 0.6, this.size * 0.5, 0, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(' + color + ', ' + (this.brightness * 0.8) + ')';
+                    ctx.fill();
+                    
+                    // 绘制眼睛
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                    ctx.beginPath();
+                    ctx.arc(-this.size * 1.1, -this.size * 0.25, this.size * 0.15, 0, Math.PI * 2);
+                    ctx.arc(-this.size * 1.1, this.size * 0.25, this.size * 0.15, 0, Math.PI * 2);
+                    ctx.fill();
+                    
                     // 特殊效果
-                    if (this.type.hasStardust && Math.random() > 0.7) {
-                        // 星尘粒子
-                        for (let i = 0; i < 3; i++) {
-                            const sx = this.x + (Math.random() - 0.5) * 30;
-                            const sy = this.y + (Math.random() - 0.5) * 30;
+                    if (this.type.hasStardust && Math.random() > 0.8) {
+                        for (let i = 0; i < 2; i++) {
+                            const sx = (Math.random() - 0.5) * 40;
+                            const sy = (Math.random() - 0.5) * 40;
                             ctx.beginPath();
                             ctx.arc(sx, sy, Math.random() * 1.5, 0, Math.PI * 2);
-                            ctx.fillStyle = 'rgba(255, 255, 255, ' + (Math.random() * 0.5) + ')';
+                            ctx.fillStyle = 'rgba(255, 255, 255, ' + (Math.random() * 0.6) + ')';
                             ctx.fill();
                         }
                     }
                     
-                    if (this.type.hasGhost && Math.random() > 0.85) {
-                        // 残影效果
+                    ctx.restore();
+                }
+            }
+            
+            // 蛛网丝线类
+            class WebThread {
+                constructor(spider1, spider2) {
+                    this.s1 = spider1;
+                    this.s2 = spider2;
+                    this.opacity = 0;
+                    this.dewdrop = Math.random() > 0.7;
+                    this.dewPhase = Math.random() * Math.PI * 2;
+                }
+                
+                update() {
+                    if (isWeaving) {
+                        this.opacity = Math.min(this.opacity + 0.03, 0.9);
+                    } else {
+                        this.opacity = Math.max(this.opacity - 0.05, 0.15);
+                    }
+                }
+                
+                draw() {
+                    const dx = this.s2.x - this.s1.x;
+                    const dy = this.s2.y - this.s1.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist > 500) return;
+                    
+                    // 蛛网丝线有轻微的下垂效果
+                    const midX = (this.s1.x + this.s2.x) / 2;
+                    const midY = (this.s1.y + this.s2.y) / 2 + Math.sin(frameCount * 0.05 + this.dewPhase) * 3;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(this.s1.x, this.s1.y);
+                    ctx.quadraticCurveTo(midX, midY, this.s2.x, this.s2.y);
+                    ctx.strokeStyle = 'rgba(255, 215, 0, ' + this.opacity + ')';
+                    ctx.lineWidth = isWeaving ? 1.5 : 0.5;
+                    ctx.stroke();
+                    
+                    // 露珠效果
+                    if (this.dewdrop && this.opacity > 0.5) {
                         ctx.beginPath();
-                        ctx.arc(this.x - this.vx * 10, this.y - this.vy * 10, this.size * 0.7, 0, Math.PI * 2);
-                        ctx.fillStyle = 'rgba(' + color + ', 0.2)';
+                        ctx.arc(midX, midY, 2 + Math.sin(frameCount * 0.1 + this.dewPhase), 0, Math.PI * 2);
+                        ctx.fillStyle = 'rgba(255, 255, 255, ' + (this.opacity * 0.8) + ')';
                         ctx.fill();
                     }
-                    
-                    if (this.type.hasBubbles && frameCount % 60 < 30) {
-                        // 注释气泡
-                        ctx.beginPath();
-                        ctx.arc(this.x + 15, this.y - 15, 4, 0, Math.PI * 2);
-                        ctx.fillStyle = 'rgba(254, 240, 138, 0.4)';
-                        ctx.fill();
+                }
+            }
+            
+            // 中心蛛网结构
+            class CenterWeb {
+                constructor() {
+                    this.radius = 0;
+                    this.maxRadius = 150;
+                    this.spokes = 12;
+                    this.rings = 5;
+                }
+                
+                update() {
+                    if (isWeaving) {
+                        this.radius = Math.min(this.radius + 3, this.maxRadius);
+                    } else {
+                        this.radius = Math.max(this.radius - 5, 0);
                     }
+                }
+                
+                draw() {
+                    if (this.radius < 5) return;
                     
-                    if (this.type.hasStructure && frameCount % 90 < 45) {
-                        // 结构线
+                    const cx = width / 2;
+                    const cy = height / 2;
+                    const alpha = Math.min(this.radius / this.maxRadius, 0.8);
+                    
+                    ctx.strokeStyle = 'rgba(255, 215, 0, ' + alpha + ')';
+                    ctx.lineWidth = 1.5;
+                    
+                    // 绘制辐条（从中心向外）
+                    for (let i = 0; i < this.spokes; i++) {
+                        const angle = (i / this.spokes) * Math.PI * 2 + weavingProgress * 0.3;
                         ctx.beginPath();
-                        ctx.moveTo(this.x - 20, this.y);
-                        ctx.lineTo(this.x + 20, this.y);
-                        ctx.strokeStyle = 'rgba(30, 58, 138, 0.3)';
-                        ctx.lineWidth = 1;
+                        ctx.moveTo(cx, cy);
+                        ctx.lineTo(
+                            cx + Math.cos(angle) * this.radius,
+                            cy + Math.sin(angle) * this.radius
+                        );
                         ctx.stroke();
                     }
                     
-                    if (this.type.hasCloud && Math.random() > 0.9) {
-                        // 祥云效果
+                    // 绘制同心圆环
+                    ctx.lineWidth = 0.8;
+                    for (let i = 1; i <= this.rings; i++) {
+                        const r = (this.radius / this.rings) * i;
                         ctx.beginPath();
-                        ctx.arc(this.x + 12, this.y - 8, 5, 0, Math.PI * 2);
-                        ctx.arc(this.x + 18, this.y - 5, 4, 0, Math.PI * 2);
-                        ctx.fillStyle = 'rgba(220, 38, 38, 0.2)';
-                        ctx.fill();
-                    }
-                    
-                    if (this.type.hasChart && frameCount % 120 < 60) {
-                        // 图表图标
-                        ctx.fillStyle = 'rgba(59, 130, 246, 0.4)';
-                        ctx.fillRect(this.x + 12, this.y - 8, 3, 8);
-                        ctx.fillRect(this.x + 17, this.y - 12, 3, 12);
-                    }
-                    
-                    if (this.type.hasCitation && frameCount % 100 < 50) {
-                        // 引用标记
-                        ctx.fillStyle = 'rgba(22, 101, 52, 0.4)';
-                        ctx.font = '10px sans-serif';
-                        ctx.fillText('"', this.x + 15, this.y - 5);
-                    }
-                    
-                    if (this.type.hasFire && Math.random() > 0.92) {
-                        // 火焰图标
-                        ctx.fillStyle = 'rgba(249, 115, 22, 0.6)';
-                        ctx.font = '10px sans-serif';
-                        ctx.fillText('🔥', this.x + 12, this.y - 8);
+                        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+                        ctx.strokeStyle = 'rgba(255, 215, 0, ' + (alpha * 0.6) + ')';
+                        ctx.stroke();
                     }
                 }
             }
@@ -846,137 +899,119 @@
                 height = canvas.height = window.innerHeight;
             }
             
-            function initParticles() {
-                particles = [];
-                let count = Math.floor((width * height) / 10000);
-                count = Math.max(CONFIG.MIN_PARTICLES, Math.min(CONFIG.MAX_PARTICLES, count));
+            function initSpiders() {
+                spiders = [];
+                let count = Math.floor((width * height) / 15000);
+                count = Math.max(CONFIG.MIN_SPIDERS, Math.min(CONFIG.MAX_SPIDERS, count));
                 for (let i = 0; i < count; i++) {
-                    particles.push(new Particle());
+                    spiders.push(new SmartSpider());
                 }
+                centerWeb = new CenterWeb();
             }
             
-            function drawConnections() {
-                const maxDistance = isWeaving ? 400 : 150;
-                const maxOpacity = isWeaving ? 0.95 : 0.35;
-                const maxConnections = isWeaving ? 5 : 2;
+            function updateWebThreads() {
+                // 动态更新蛛网丝线
+                webThreads = [];
+                const maxDist = isWeaving ? 300 : 120;
+                const maxConnections = isWeaving ? 4 : 2;
                 
-                for (let i = 0; i < particles.length; i++) {
-                    let connectionCount = 0;
-                    for (let j = i + 1; j < particles.length; j++) {
-                        if (connectionCount >= maxConnections) break;
-                        const dx = particles[i].x - particles[j].x;
-                        const dy = particles[i].y - particles[j].y;
-                        const distance = Math.sqrt(dx * dx + dy * dy);
-                        
-                        if (distance < maxDistance) {
-                            const opacity = (1 - distance / maxDistance) * maxOpacity;
-                            // 结网时使用金色高亮连线
-                            const lineColor = isWeaving ? '255, 215, 0' : particles[i].getCurrentColor();
-                            const lineWidth = isWeaving ? 1.2 : 0.5;
-                            
-                            ctx.beginPath();
-                            ctx.moveTo(particles[i].x, particles[i].y);
-                            ctx.lineTo(particles[j].x, particles[j].y);
-                            ctx.strokeStyle = 'rgba(' + lineColor + ', ' + opacity + ')';
-                            ctx.lineWidth = lineWidth;
-                            ctx.stroke();
-                            connectionCount++;
+                for (let i = 0; i < spiders.length; i++) {
+                    let connections = 0;
+                    for (let j = i + 1; j < spiders.length; j++) {
+                        if (connections >= maxConnections) break;
+                        const dx = spiders[i].x - spiders[j].x;
+                        const dy = spiders[i].y - spiders[j].y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < maxDist) {
+                            webThreads.push(new WebThread(spiders[i], spiders[j]));
+                            connections++;
                         }
                     }
                 }
-                
-                // 鼠标连线
-                if (mouse.x && mouse.y) {
-                    particles.forEach(function(p) {
-                        const dx = p.x - mouse.x, dy = p.y - mouse.y;
-                        const distance = Math.sqrt(dx * dx + dy * dy);
-                        if (distance < 200) {
-                            const opacity = (1 - distance / 200) * 0.6;
-                            ctx.beginPath();
-                            ctx.moveTo(p.x, p.y);
-                            ctx.lineTo(mouse.x, mouse.y);
-                            ctx.strokeStyle = 'rgba(' + p.getCurrentColor() + ', ' + opacity + ')';
-                            ctx.lineWidth = 0.8;
-                            ctx.stroke();
-                        }
-                    });
-                }
+            }
+            
+            function drawMouseConnections() {
+                if (!mouse.x || !mouse.y) return;
+                spiders.forEach(function(s) {
+                    const dx = s.x - mouse.x, dy = s.y - mouse.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 180) {
+                        const opacity = (1 - dist / 180) * 0.5;
+                        ctx.beginPath();
+                        ctx.moveTo(s.x, s.y);
+                        ctx.lineTo(mouse.x, mouse.y);
+                        ctx.strokeStyle = 'rgba(' + s.type.color + ', ' + opacity + ')';
+                        ctx.lineWidth = 0.6;
+                        ctx.stroke();
+                    }
+                });
             }
             
             function animate(currentTime) {
                 animationId = requestAnimationFrame(animate);
                 frameCount++;
+                if (isWeaving) weavingProgress += 0.02;
+                
                 const deltaTime = currentTime - lastFrameTime;
                 if (deltaTime < frameInterval) return;
                 lastFrameTime = currentTime - (deltaTime % frameInterval);
+                
                 ctx.clearRect(0, 0, width, height);
-                drawConnections();
-                particles.forEach(function(p) { p.update(); p.draw(); });
+                
+                // 更新和绘制中心蛛网
+                if (centerWeb) {
+                    centerWeb.update();
+                    centerWeb.draw();
+                }
+                
+                // 更新蛛网丝线
+                updateWebThreads();
+                webThreads.forEach(function(t) { t.update(); t.draw(); });
+                
+                // 鼠标连线
+                drawMouseConnections();
+                
+                // 更新和绘制蜘蛛
+                spiders.forEach(function(s) { s.update(); s.draw(); });
             }
             
+            // 事件监听
             window.addEventListener('mousemove', function(e) {
                 mouse.x = e.clientX;
                 mouse.y = e.clientY;
             });
-            window.addEventListener('mouseleave', function() {
-                mouse.x = null;
-                mouse.y = null;
-            });
+            window.addEventListener('mouseleave', function() { mouse.x = null; mouse.y = null; });
             window.addEventListener('touchmove', function(e) {
-                if (e.touches.length > 0) {
-                    mouse.x = e.touches[0].clientX;
-                    mouse.y = e.touches[0].clientY;
-                }
+                if (e.touches[0]) { mouse.x = e.touches[0].clientX; mouse.y = e.touches[0].clientY; }
             }, { passive: true });
-            window.addEventListener('touchend', function() {
-                mouse.x = null;
-                mouse.y = null;
-            });
-            window.addEventListener('resize', function() {
-                initCanvas();
-                initParticles();
-            });
+            window.addEventListener('touchend', function() { mouse.x = null; mouse.y = null; });
+            window.addEventListener('resize', function() { initCanvas(); initSpiders(); });
             document.addEventListener('visibilitychange', function() {
-                if (document.hidden) {
-                    if (animationId) { cancelAnimationFrame(animationId); animationId = null; }
-                } else {
-                    if (!animationId) animate(0);
-                }
+                if (document.hidden && animationId) { cancelAnimationFrame(animationId); animationId = null; }
+                else if (!animationId) animate(0);
             });
             
             initCanvas();
-            initParticles();
+            initSpiders();
             animate(0);
             
             return {
-                setWeaving: function(value) { 
+                setWeaving: function(value) {
                     isWeaving = value;
-                    if (!value) {
-                        // 散开效果
-                        particles.forEach(function(p) {
-                            p.vx = (Math.random() - 0.5) * 4;
-                            p.vy = (Math.random() - 0.5) * 4;
-                            p.weavingStrength = 0;
-                        });
-                        setTimeout(function() {
-                            particles.forEach(function(p) {
-                                p.vx = (Math.random() - 0.5) * 0.5;
-                                p.vy = (Math.random() - 0.5) * 0.5;
-                            });
-                        }, 600);
-                    }
+                    if (!value && centerWeb) centerWeb.radius = 0;
                 },
                 scatter: function() {
-                    particles.forEach(function(p) {
-                        p.vx = (Math.random() - 0.5) * 3;
-                        p.vy = (Math.random() - 0.5) * 3;
+                    spiders.forEach(function(s) {
+                        s.vx = (Math.random() - 0.5) * 5;
+                        s.vy = (Math.random() - 0.5) * 5;
+                        s.weavingStrength = 0;
                     });
                     setTimeout(function() {
-                        particles.forEach(function(p) {
-                            p.vx = (Math.random() - 0.5) * 0.5;
-                            p.vy = (Math.random() - 0.5) * 0.5;
+                        spiders.forEach(function(s) {
+                            s.vx = (Math.random() - 0.5) * 0.6;
+                            s.vy = (Math.random() - 0.5) * 0.6;
                         });
-                    }, 500);
+                    }, 800);
                 }
             };
         })();
