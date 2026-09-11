@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/spider-agent.html"
+      "destination": "/spider-nest-v2.html"
     }
   ]
 }
