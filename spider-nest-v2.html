@@ -12,10 +12,28 @@
             padding: 0;
             box-sizing: border-box;
         }
+        /* ===== mono-color 科技感色板 ===== */
+        :root {
+            --bg-deep: #03060b;
+            --bg: #060a11;
+            --surface: rgba(11, 18, 29, 0.92);
+            --surface-solid: rgba(14, 22, 35, 0.97);
+            --line: rgba(158, 184, 211, 0.14);
+            --line-hi: rgba(158, 184, 211, 0.28);
+            --ink: #e8eef7;
+            --ink-2: rgba(232, 238, 247, 0.62);
+            --ink-3: rgba(232, 238, 247, 0.38);
+            --accent: #159dda;
+            --accent-hi: #4dc4ec;
+            --accent-soft: rgba(21, 157, 218, 0.1);
+            --accent-line: rgba(21, 157, 218, 0.28);
+            --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+        }
+
         
         body {
             font-family: 'Noto Sans SC', sans-serif;
-            background: #0a0a0f;
+            background: var(--bg-deep);
             min-height: 100vh;
             overflow-x: hidden;
         }
@@ -30,6 +48,21 @@
             z-index: 0;
         }
         
+        /* 科技网格纹理 */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(158, 184, 211, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(158, 184, 211, 0.05) 1px, transparent 1px);
+            background-size: 48px 48px;
+            -webkit-mask-image: radial-gradient(ellipse 85% 75% at 50% 45%, #000 25%, transparent 100%);
+            mask-image: radial-gradient(ellipse 85% 75% at 50% 45%, #000 25%, transparent 100%);
+        }
+
         /* 主容器 */
         .main-container {
             position: relative;
@@ -40,8 +73,38 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
+            /* 容器铺满整屏，必须放行鼠标事件，否则 canvas 收不到悬停 */
+            pointer-events: none;
+        }
+
+        .input-section,
+        .capability-tags,
+        .result-section {
+            pointer-events: auto;
         }
         
+        /* 技术标签行 */
+        .hero-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            font-family: var(--mono);
+            font-size: 0.7rem;
+            letter-spacing: 0.16em;
+            color: var(--ink-3);
+            text-transform: uppercase;
+            margin-bottom: 14px;
+        }
+
+        .hero-eyebrow i {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--accent-hi);
+            box-shadow: 0 0 8px var(--accent-hi);
+            animation: pulse 2.4s ease-in-out infinite;
+            font-style: normal;
+        }
         /* 标题区域 */
         .hero-title {
             text-align: center;
@@ -51,13 +114,13 @@
         .hero-title h1 {
             font-size: clamp(1.5rem, 4vw, 2.2rem);
             font-weight: 500;
-            color: rgba(255, 255, 255, 0.9);
+            color: var(--ink);
             letter-spacing: 2px;
             margin-bottom: 8px;
         }
         
         .hero-title p {
-            color: rgba(255, 255, 255, 0.4);
+            color: var(--ink-2);
             font-size: 0.9rem;
             font-weight: 300;
         }
@@ -71,17 +134,17 @@
         
         .input-wrapper {
             position: relative;
-            background: rgba(20, 20, 30, 0.9);
+            background: var(--surface);
             backdrop-filter: blur(20px);
             border-radius: 16px;
-            border: 1px solid rgba(255, 215, 0, 0.15);
+            border: 1px solid var(--line-hi);
             padding: 4px;
             transition: all 0.3s ease;
         }
         
         .input-wrapper:focus-within {
-            border-color: rgba(255, 215, 0, 0.4);
-            box-shadow: 0 0 40px rgba(255, 215, 0, 0.1);
+            border-color: var(--accent-line);
+            box-shadow: 0 0 0 1px var(--accent-soft), 0 0 48px rgba(21, 157, 218, 0.14);
         }
         
         .input-inner {
@@ -96,23 +159,25 @@
             background: transparent;
             border: none;
             outline: none;
-            color: #fff;
+            color: var(--ink);
             font-size: 1rem;
             padding: 12px 0;
             min-width: 0;
         }
         
         .input-field::placeholder {
-            color: rgba(255, 255, 255, 0.35);
+            color: var(--ink-3);
         }
         
         .generate-btn {
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.9) 0%, rgba(255, 237, 78, 0.9) 100%);
-            color: #0a0a0f;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hi) 100%);
+            color: #04121c;
             border: none;
             padding: 12px 28px;
             border-radius: 12px;
             font-weight: 600;
+            font-family: var(--mono);
+            letter-spacing: 0.08em;
             font-size: 0.95rem;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -124,7 +189,7 @@
         
         .generate-btn:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(255, 215, 0, 0.35);
+            box-shadow: 0 8px 30px rgba(21, 157, 218, 0.42);
         }
         
         .generate-btn:disabled {
@@ -143,11 +208,11 @@
         }
         
         .tag {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(158, 184, 211, 0.04);
+            border: 1px solid var(--line);
             border-radius: 20px;
             padding: 6px 14px;
-            color: rgba(255, 255, 255, 0.5);
+            color: var(--ink-2);
             font-size: 0.85rem;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -157,11 +222,19 @@
         }
         
         .tag:hover {
-            background: rgba(255, 215, 0, 0.08);
-            border-color: rgba(255, 215, 0, 0.25);
-            color: rgba(255, 215, 0, 0.8);
+            background: var(--accent-soft);
+            border-color: var(--accent-line);
+            color: var(--accent-hi);
         }
         
+        .tag-code {
+            font-family: var(--mono);
+            font-size: 0.62rem;
+            letter-spacing: 0.1em;
+            color: var(--accent-hi);
+            opacity: 0.75;
+        }
+
         /* 结果展示区域 */
         .result-section {
             width: 100%;
@@ -177,10 +250,10 @@
         }
         
         .result-card {
-            background: rgba(20, 20, 30, 0.95);
+            background: var(--surface-solid);
             backdrop-filter: blur(20px);
             border-radius: 16px;
-            border: 1px solid rgba(255, 215, 0, 0.15);
+            border: 1px solid var(--line-hi);
             padding: 24px;
             position: relative;
         }
@@ -193,7 +266,7 @@
         }
         
         .result-title {
-            color: rgba(255, 215, 0, 0.8);
+            color: var(--accent-hi);
             font-size: 1rem;
             font-weight: 500;
         }
@@ -204,24 +277,26 @@
         }
         
         .action-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(158, 184, 211, 0.06);
+            border: 1px solid var(--line);
             border-radius: 8px;
             padding: 6px 12px;
-            color: rgba(255, 255, 255, 0.6);
+            color: var(--ink-2);
             font-size: 0.8rem;
+            font-family: var(--mono);
+            letter-spacing: 0.06em;
             cursor: pointer;
             transition: all 0.3s ease;
         }
         
         .action-btn:hover {
-            background: rgba(255, 215, 0, 0.1);
-            border-color: rgba(255, 215, 0, 0.25);
-            color: rgba(255, 215, 0, 0.8);
+            background: var(--accent-soft);
+            border-color: var(--accent-line);
+            color: var(--accent-hi);
         }
         
         .result-content {
-            color: rgba(255, 255, 255, 0.85);
+            color: var(--ink);
             line-height: 1.8;
             font-size: 0.95rem;
             white-space: pre-wrap;
@@ -234,7 +309,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(3, 6, 11, 0.84);
             z-index: 50;
             display: none;
             justify-content: center;
@@ -247,8 +322,10 @@
         }
         
         .weaving-text {
-            color: #ffd700;
+            color: var(--accent-hi);
             font-size: 1.2rem;
+            font-family: var(--mono);
+            letter-spacing: 0.14em;
             margin-top: 30px;
             animation: pulse 1.5s ease-in-out infinite;
         }
@@ -261,8 +338,8 @@
         /* 蜘蛛信息卡片 */
         .spider-card {
             position: fixed;
-            background: rgba(15, 15, 25, 0.98);
-            border: 1px solid rgba(255, 215, 0, 0.2);
+            background: var(--surface-solid);
+            border: 1px solid var(--accent-line);
             border-radius: 12px;
             padding: 16px;
             min-width: 260px;
@@ -272,7 +349,7 @@
             opacity: 0;
             transform: translateY(10px);
             transition: all 0.3s ease;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(158, 184, 211, 0.07);
         }
         
         .spider-card.show {
@@ -286,21 +363,28 @@
             gap: 10px;
             margin-bottom: 12px;
             padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid var(--line);
         }
         
         .spider-card-icon {
-            font-size: 1.5rem;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 2px solid currentColor;
+            box-shadow: 0 0 10px currentColor;
+            flex: none;
         }
         
         .spider-card-name {
-            color: #fff;
+            color: var(--ink);
             font-weight: 500;
             font-size: 1rem;
         }
         
         .spider-card-domain {
-            color: rgba(255, 255, 255, 0.5);
+            font-family: var(--mono);
+            letter-spacing: 0.06em;
+            color: var(--ink-3);
             font-size: 0.8rem;
             margin-top: 2px;
         }
@@ -313,15 +397,15 @@
         }
         
         .spider-card-tag {
-            background: rgba(255, 215, 0, 0.1);
-            color: rgba(255, 215, 0, 0.7);
+            background: var(--accent-soft);
+            color: var(--accent-hi);
             padding: 3px 8px;
             border-radius: 4px;
             font-size: 0.75rem;
         }
         
         .spider-card-desc {
-            color: rgba(255, 255, 255, 0.6);
+            color: var(--ink-2);
             font-size: 0.85rem;
             line-height: 1.6;
             margin-bottom: 12px;
@@ -331,7 +415,7 @@
             display: flex;
             justify-content: space-between;
             padding-top: 10px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 1px solid var(--line);
         }
         
         .spider-card-stat {
@@ -339,26 +423,32 @@
         }
         
         .spider-card-stat-value {
-            color: #ffd700;
+            color: var(--accent-hi);
             font-weight: 600;
             font-size: 0.9rem;
         }
         
         .spider-card-stat-label {
-            color: rgba(255, 255, 255, 0.4);
+            color: var(--ink-3);
             font-size: 0.7rem;
             margin-top: 2px;
         }
         
         /* 页脚 */
         .footer {
+            font-family: var(--mono);
+            letter-spacing: 0.12em;
+            display: flex;
+            align-items: center;
+            gap: 9px;
             position: fixed;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            color: rgba(255, 255, 255, 0.2);
+            color: var(--ink-3);
             font-size: 0.8rem;
             z-index: 10;
+            pointer-events: none;
         }
         
         /* 响应式 */
@@ -382,7 +472,28 @@
                 max-width: 260px;
                 padding: 12px;
             }
+
+            .hero-eyebrow {
+                font-size: 0.6rem;
+                letter-spacing: 0.09em;
+                margin-bottom: 10px;
+            }
+
+            .footer {
+                white-space: nowrap;
+                font-size: 0.7rem;
+                letter-spacing: 0.08em;
+            }
         }
+        .footer-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--accent-hi);
+            box-shadow: 0 0 8px var(--accent-hi);
+            animation: pulse 2.4s ease-in-out infinite;
+        }
+
     </style>
 </head>
 <body>
@@ -392,7 +503,7 @@
     <!-- 蜘蛛信息卡片 -->
     <div class="spider-card" id="spiderCard">
         <div class="spider-card-header">
-            <span class="spider-card-icon" id="cardIcon">🕷️</span>
+            <span class="spider-card-icon" id="cardIcon"></span>
             <div>
                 <div class="spider-card-name" id="cardName">蜘蛛名称</div>
                 <div class="spider-card-domain" id="cardDomain">能力域</div>
@@ -426,6 +537,7 @@
     <div class="main-container">
         <!-- 标题 -->
         <div class="hero-title">
+            <div class="hero-eyebrow"><i></i>AGENT NETWORK · 12 SPIDERS ONLINE</div>
             <h1>一句话，生成万物</h1>
             <p>输入你想做的任何事，AI自动完成</p>
         </div>
@@ -451,28 +563,28 @@
         <!-- 能力标签 -->
         <div class="capability-tags">
             <div class="tag" onclick="setPrompt('帮我写一篇关于人工智能的科普文章')">
-                <span>📝</span> 写文章
+                <span class="tag-code">TXT</span> 写文章
             </div>
             <div class="tag" onclick="setPrompt('用Python写一个爬取网页数据的脚本')">
-                <span>💻</span> 写代码
+                <span class="tag-code">CODE</span> 写代码
             </div>
             <div class="tag" onclick="setPrompt('设计一个科技公司的Logo')">
-                <span>🎨</span> 做设计
+                <span class="tag-code">UI</span> 做设计
             </div>
             <div class="tag" onclick="setPrompt('分析这份销售数据，找出增长趋势')">
-                <span>📊</span> 分析数据
+                <span class="tag-code">DATA</span> 分析数据
             </div>
             <div class="tag" onclick="setPrompt('写一首关于夏天的流行歌曲歌词')">
-                <span>🎵</span> 创作音乐
+                <span class="tag-code">AUD</span> 创作音乐
             </div>
             <div class="tag" onclick="setPrompt('帮我写一封正式的商务合作邮件')">
-                <span>📧</span> 写邮件
+                <span class="tag-code">MAIL</span> 写邮件
             </div>
             <div class="tag" onclick="setPrompt('制定一个30天健身计划')">
-                <span>📋</span> 做计划
+                <span class="tag-code">PLAN</span> 做计划
             </div>
             <div class="tag" onclick="setPrompt('总结量子计算的最新进展')">
-                <span>🔍</span> 查资料
+                <span class="tag-code">RES</span> 查资料
             </div>
         </div>
         
@@ -480,10 +592,10 @@
         <div class="result-section" id="resultSection">
             <div class="result-card">
                 <div class="result-header">
-                    <div class="result-title">🕷️ 生成结果</div>
+                    <div class="result-title"><span class="tag-code">OUTPUT</span> 生成结果</div>
                     <div class="result-actions">
-                        <button class="action-btn" onclick="copyResult()">📋 复制</button>
-                        <button class="action-btn" onclick="regenerate()">🔄 重新生成</button>
+                        <button class="action-btn" onclick="copyResult()">复制</button>
+                        <button class="action-btn" onclick="regenerate()">重新生成</button>
                     </div>
                 </div>
                 <div class="result-content" id="resultContent"></div>
@@ -493,7 +605,7 @@
     
     <!-- 页脚 -->
     <div class="footer">
-        因子蜘蛛 · 隐藏的AI代理网络
+        <i class="footer-dot"></i>因子蜘蛛 · 隐藏的AI代理网络
     </div>
 
     <script>
@@ -503,10 +615,9 @@
             {
                 id: 'liucixin',
                 name: '刘慈欣风写作蜘蛛',
-                icon: '🕷️',
-                domain: '📝 文本域',
-                color: '#C0C0C0',
-                glowColor: 'rgba(192, 192, 192, 0.6)',
+                domain: '文本域',
+                color: '#A8C4E0',
+                glowColor: 'rgba(168, 196, 224, 0.55)',
                 size: 2.2,
                 tags: ['宏大叙事', '硬科幻', '宇宙尺度'],
                 desc: '擅长宇宙尺度的世界观构建，技术细节严谨的硬科幻，冷酷诗意的叙事风格',
@@ -518,10 +629,9 @@
             {
                 id: 'pkd',
                 name: 'PKD风写作蜘蛛',
-                icon: '🕷️',
-                domain: '📝 文本域',
-                color: '#9D4EDD',
-                glowColor: 'rgba(157, 78, 221, 0.6)',
+                domain: '文本域',
+                color: '#8B7FE8',
+                glowColor: 'rgba(139, 127, 232, 0.6)',
                 size: 2.2,
                 tags: ['迷幻现实', '身份困惑', '赛博朋克'],
                 desc: '擅长迷幻现实的叙事，身份与存在的哲学探讨，赛博朋克美学',
@@ -533,10 +643,9 @@
             {
                 id: 'luxun',
                 name: '鲁迅风写作蜘蛛',
-                icon: '🕷️',
-                domain: '📝 文本域',
-                color: '#8B0000',
-                glowColor: 'rgba(139, 0, 0, 0.6)',
+                domain: '文本域',
+                color: '#6D8FB8',
+                glowColor: 'rgba(109, 143, 184, 0.55)',
                 size: 2.2,
                 tags: ['犀利批判', '冷峻深刻', '民族魂'],
                 desc: '擅长犀利的社会批判，冷峻深刻的洞察，铁屋中的呐喊',
@@ -549,10 +658,9 @@
             {
                 id: 'clean',
                 name: '简洁风代码蜘蛛',
-                icon: '🕷️',
-                domain: '💻 代码域',
-                color: '#00F5D4',
-                glowColor: 'rgba(0, 245, 212, 0.5)',
+                domain: '代码域',
+                color: '#4DD8C8',
+                glowColor: 'rgba(77, 216, 200, 0.5)',
                 size: 1.8,
                 tags: ['极简主义', '一行代码', '优雅'],
                 desc: '追求极致简洁，一行代码解决问题，Pythonic哲学',
@@ -564,10 +672,9 @@
             {
                 id: 'comment',
                 name: '注释狂魔代码蜘蛛',
-                icon: '🕷️',
-                domain: '💻 代码域',
-                color: '#FEF08A',
-                glowColor: 'rgba(254, 240, 138, 0.6)',
+                domain: '代码域',
+                color: '#7FC8E8',
+                glowColor: 'rgba(127, 200, 232, 0.55)',
                 size: 1.8,
                 tags: ['详细注释', '文档完备', '新手友好'],
                 desc: '每行代码都有注释，自动生成文档，最适合团队协作',
@@ -579,10 +686,9 @@
             {
                 id: 'architect',
                 name: '架构师代码蜘蛛',
-                icon: '🕷️',
-                domain: '💻 代码域',
-                color: '#1E3A8A',
-                glowColor: 'rgba(30, 58, 138, 0.6)',
+                domain: '代码域',
+                color: '#4A7FD4',
+                glowColor: 'rgba(74, 127, 212, 0.6)',
                 size: 2.4,
                 tags: ['系统设计', '可扩展', '工程化'],
                 desc: '企业级架构设计，高并发高可用，微服务专家',
@@ -595,10 +701,9 @@
             {
                 id: 'minimal',
                 name: '极简风设计蜘蛛',
-                icon: '🕷️',
-                domain: '🎨 设计域',
-                color: '#F5F5F5',
-                glowColor: 'rgba(245, 245, 245, 0.4)',
+                domain: '设计域',
+                color: '#E4EAF2',
+                glowColor: 'rgba(228, 234, 242, 0.45)',
                 size: 1.8,
                 tags: ['少即是多', '留白', '高级感'],
                 desc: 'Less is more，极致留白，高级感设计',
@@ -610,10 +715,9 @@
             {
                 id: 'cyberpunk',
                 name: '赛博朋克设计蜘蛛',
-                icon: '🕷️',
-                domain: '🎨 设计域',
-                color: '#00F0FF',
-                glowColor: 'rgba(0, 240, 255, 0.6)',
+                domain: '设计域',
+                color: '#00E5FF',
+                glowColor: 'rgba(0, 229, 255, 0.6)',
                 size: 2.0,
                 tags: ['霓虹美学', '高科技', '反乌托邦'],
                 desc: '霓虹灯管美学，故障艺术，未来主义视觉',
@@ -625,10 +729,9 @@
             {
                 id: 'guochao',
                 name: '国潮风设计蜘蛛',
-                icon: '🕷️',
-                domain: '🎨 设计域',
-                color: '#DC2626',
-                glowColor: 'rgba(220, 38, 38, 0.5)',
+                domain: '设计域',
+                color: '#C9705F',
+                glowColor: 'rgba(201, 112, 95, 0.55)',
                 size: 2.0,
                 tags: ['东方美学', '传统现代', '文化自信'],
                 desc: '传统与现代的碰撞，东方美学新表达',
@@ -641,10 +744,9 @@
             {
                 id: 'business',
                 name: '商业报告数据蜘蛛',
-                icon: '🕷️',
-                domain: '📊 数据域',
-                color: '#3B82F6',
-                glowColor: 'rgba(59, 130, 246, 0.5)',
+                domain: '数据域',
+                color: '#3B9BE8',
+                glowColor: 'rgba(59, 155, 232, 0.55)',
                 size: 1.8,
                 tags: ['商业洞察', 'ROI导向', '决策支持'],
                 desc: '商业数据分析专家，ROI计算，战略决策支持',
@@ -656,10 +758,9 @@
             {
                 id: 'academic',
                 name: '学术风数据蜘蛛',
-                icon: '🕷️',
-                domain: '📊 数据域',
-                color: '#166534',
-                glowColor: 'rgba(22, 101, 52, 0.5)',
+                domain: '数据域',
+                color: '#5E8C7A',
+                glowColor: 'rgba(94, 140, 122, 0.55)',
                 size: 1.8,
                 tags: ['严谨论证', '文献支撑', '方法论'],
                 desc: '学术论文级别分析，严谨方法论，文献综述',
@@ -671,10 +772,9 @@
             {
                 id: 'selfmedia',
                 name: '自媒体数据蜘蛛',
-                icon: '🕷️',
-                domain: '📊 数据域',
-                color: '#F97316',
-                glowColor: 'rgba(249, 115, 22, 0.6)',
+                domain: '数据域',
+                color: '#E8843C',
+                glowColor: 'rgba(232, 132, 60, 0.55)',
                 size: 1.8,
                 tags: ['爆款逻辑', '传播力', '热点追踪'],
                 desc: '10w+文章分析，爆款标题生成，热点预测',
@@ -703,16 +803,44 @@
         
         // 粒子类
         class Particle {
-            constructor(isStyleSpider = false, spiderData = null) {
+            constructor(isStyleSpider = false, spiderData = null, slot = 0, slotTotal = 12) {
                 this.isStyleSpider = isStyleSpider;
                 this.spiderData = spiderData;
-                
+
                 if (isStyleSpider && spiderData) {
-                    // 风格蜘蛛：分布在屏幕周围，相对固定位置
-                    const angle = Math.random() * Math.PI * 2;
-                    const radius = Math.min(width, height) * 0.35;
-                    this.x = width / 2 + Math.cos(angle) * radius;
-                    this.y = height / 2 + Math.sin(angle) * radius;
+                    let px, py;
+
+                    if (width < 720 && height >= width) {
+                        // 竖屏窄屏：上下两条带布点，避开中央内容列
+                        const half = Math.ceil(slotTotal / 2);
+                        const inTop = slot < half;
+                        const k = inTop ? slot : slot - half;
+                        const m = inTop ? half : slotTotal - half;
+                        const t = m > 1 ? k / (m - 1) : 0.5;
+                        px = width * (0.13 + t * 0.74) + (Math.random() - 0.5) * width * 0.05;
+                        py = inTop
+                            ? height * (0.05 + (k % 2) * 0.06)
+                            : height * (0.86 + (k % 2) * 0.05);
+                    } else {
+                        // 宽屏：均匀分布在外环
+                        const angle = (slot / slotTotal) * Math.PI * 2 - Math.PI / 2;
+                        px = width / 2 + Math.cos(angle) * width * 0.42;
+                        py = height / 2 + Math.sin(angle) * height * 0.34;
+
+                        // 落在中央内容区就沿径向推出去，避免压住输入框与标签
+                        const keepX = Math.min(width * 0.26, 330);
+                        const keepY = Math.min(height * 0.22, 200);
+                        for (let guard = 0; guard < 40; guard++) {
+                            const insideX = Math.abs(px - width / 2) < keepX;
+                            const insideY = Math.abs(py - height / 2) < keepY;
+                            if (!(insideX && insideY)) break;
+                            px += Math.cos(angle) * 26;
+                            py += Math.sin(angle) * 26;
+                        }
+                    }
+
+                    this.x = px;
+                    this.y = py;
                     this.baseX = this.x;
                     this.baseY = this.y;
                     this.vx = (Math.random() - 0.5) * 0.2;
@@ -727,8 +855,8 @@
                     this.vx = (Math.random() - 0.5) * 0.8;
                     this.vy = (Math.random() - 0.5) * 0.8;
                     this.size = 2 + Math.random() * 2;
-                    this.color = '#FFD700';
-                    this.glowColor = 'rgba(255, 215, 0, 0.3)';
+                    this.color = '#159dda';
+                    this.glowColor = 'rgba(21, 157, 218, 0.32)';
                 }
                 
                 this.brightness = Math.random() * 0.4 + 0.4;
@@ -804,7 +932,7 @@
                             1,
                             0, Math.PI * 2
                         );
-                        ctx.fillStyle = `rgba(192, 192, 192, ${Math.random() * 0.5})`;
+                        ctx.fillStyle = `rgba(168, 196, 224, ${Math.random() * 0.5})`;
                         ctx.fill();
                     }
                 } else if (effect === 'rainbow') {
@@ -825,14 +953,15 @@
                     // 祥云效果
                     ctx.beginPath();
                     ctx.arc(this.x - 5, this.y - 5, 3, 0, Math.PI * 2);
-                    ctx.fillStyle = 'rgba(220, 38, 38, 0.2)';
+                    ctx.fillStyle = 'rgba(201, 112, 95, 0.25)';
                     ctx.fill();
                 } else if (effect === 'fire') {
                     // 火焰效果
                     if (Math.random() > 0.8) {
-                        ctx.font = '12px Arial';
-                        ctx.fillStyle = 'rgba(249, 115, 22, 0.6)';
-                        ctx.fillText('🔥', this.x + 10, this.y - 10);
+                        ctx.beginPath();
+                        ctx.arc(this.x + 10, this.y - 10, 1.8, 0, Math.PI * 2);
+                        ctx.fillStyle = 'rgba(232, 132, 60, 0.65)';
+                        ctx.fill();
                     }
                 }
             }
@@ -853,9 +982,9 @@
                 particles.push(new Particle(false));
             }
             
-            // 创建12个风格蜘蛛
-            STYLE_SPIDERS.forEach(spiderData => {
-                particles.push(new Particle(true, spiderData));
+            // 创建12个风格蜘蛛（按序均匀占位）
+            STYLE_SPIDERS.forEach((spiderData, i) => {
+                particles.push(new Particle(true, spiderData, i, STYLE_SPIDERS.length));
             });
         }
         
@@ -877,7 +1006,7 @@
                         ctx.beginPath();
                         ctx.moveTo(particles[i].x, particles[i].y);
                         ctx.lineTo(particles[j].x, particles[j].y);
-                        ctx.strokeStyle = `rgba(255, 215, 0, ${opacity})`;
+                        ctx.strokeStyle = `rgba(21, 157, 218, ${opacity})`;
                         ctx.lineWidth = 0.5;
                         ctx.stroke();
                     }
@@ -897,7 +1026,7 @@
                         ctx.beginPath();
                         ctx.moveTo(styleSpiders[i].x, styleSpiders[i].y);
                         ctx.lineTo(styleSpiders[j].x, styleSpiders[j].y);
-                        ctx.strokeStyle = `rgba(255, 215, 0, ${opacity})`;
+                        ctx.strokeStyle = `rgba(21, 157, 218, ${opacity})`;
                         ctx.lineWidth = 1.5;
                         ctx.stroke();
                     }
@@ -918,7 +1047,7 @@
                         ctx.lineTo(mouse.x, mouse.y);
                         ctx.strokeStyle = p.isStyleSpider ? 
                             p.glowColor.replace(/[\d.]+\)$/, `${opacity})`) :
-                            `rgba(255, 215, 0, ${opacity})`;
+                            `rgba(21, 157, 218, ${opacity})`;
                         ctx.lineWidth = p.isStyleSpider ? 1.5 : 0.8;
                         ctx.stroke();
                     }
@@ -996,7 +1125,7 @@
         const spiderCard = document.getElementById('spiderCard');
         
         function showSpiderCard(data, x, y) {
-            document.getElementById('cardIcon').textContent = data.icon;
+            document.getElementById('cardIcon').style.color = data.color;
             document.getElementById('cardName').textContent = data.name;
             document.getElementById('cardName').style.color = data.color;
             document.getElementById('cardDomain').textContent = data.domain;
@@ -1058,7 +1187,7 @@
                     const radius = (maxRadius / 8) * i * progress;
                     weavingCtx.beginPath();
                     weavingCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-                    weavingCtx.strokeStyle = `rgba(255, 215, 0, ${0.3 * progress})`;
+                    weavingCtx.strokeStyle = `rgba(21, 157, 218, ${0.3 * progress})`;
                     weavingCtx.lineWidth = 1;
                     weavingCtx.stroke();
                 }
@@ -1072,7 +1201,7 @@
                         centerX + Math.cos(angle) * maxRadius * progress,
                         centerY + Math.sin(angle) * maxRadius * progress
                     );
-                    weavingCtx.strokeStyle = `rgba(255, 215, 0, ${0.4 * progress})`;
+                    weavingCtx.strokeStyle = `rgba(21, 157, 218, ${0.4 * progress})`;
                     weavingCtx.lineWidth = 1;
                     weavingCtx.stroke();
                 }
@@ -1083,8 +1212,8 @@
                     centerX, centerY, 0,
                     centerX, centerY, glowRadius
                 );
-                gradient.addColorStop(0, `rgba(255, 215, 0, ${0.8 * progress})`);
-                gradient.addColorStop(1, 'rgba(255, 215, 0, 0)');
+                gradient.addColorStop(0, `rgba(77, 196, 236, ${0.85 * progress})`);
+                gradient.addColorStop(1, 'rgba(21, 157, 218, 0)');
                 weavingCtx.fillStyle = gradient;
                 weavingCtx.fillRect(0, 0, 400, 400);
                 
@@ -1163,7 +1292,7 @@
             navigator.clipboard.writeText(text).then(() => {
                 const btn = event.target;
                 btn.textContent = '✓ 已复制';
-                setTimeout(() => btn.textContent = '📋 复制', 2000);
+                setTimeout(() => btn.textContent = '复制', 2000);
             });
         }
         
